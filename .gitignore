@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .env
 
+# ad-hoc scratch scripts for manually checking things (e.g. Supabase connectivity)
+check-*.mjs
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
