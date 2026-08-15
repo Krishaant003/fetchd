@@ -8,6 +8,16 @@ export async function respondToMatch(matchId: string, decision: MatchDecision): 
   if (error) throw error;
 }
 
+export async function unmatchMatch(matchId: string): Promise<void> {
+  const { error } = await supabase.from('matches').update({ status: 'unmatched' }).eq('id', matchId);
+  if (error) throw error;
+}
+
+export async function markAdopted(matchId: string): Promise<void> {
+  const { error } = await supabase.from('matches').update({ status: 'adopted' }).eq('id', matchId);
+  if (error) throw error;
+}
+
 export interface AcceptedMatch {
   match: Match;
   dog: Dog;

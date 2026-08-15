@@ -22,6 +22,37 @@ export async function fetchDeck(viewerType: ProfileType, viewerId: string): Prom
   return data as (Dog | Adopter)[];
 }
 
+export async function fetchLikedProfiles(viewerType: ProfileType, viewerId: string): Promise<(Dog | Adopter)[]> {
+  const targetType: ProfileType = viewerType === 'dog' ? 'adopter' : 'dog';
+  const targetTable = targetType === 'dog' ? 'dogs' : 'adopters';
+
+  const { data: liked, error: likedError } = await supabase
+    .from('swipes')
+    .select('target_id')
+    .eq('swiper_id', viewerId)
+    .eq('swiper_type', viewerType)
+    .eq('direction', 'right');
+  if (likedError) throw likedError;
+  const likedIds = (liked ?? []).map((s: { target_id: string }) => s.target_id);
+  if (likedIds.length === 0) return [];
+
+  const matchOwnColumn = viewerType === 'adopter' ? 'adopter_id' : 'dog_id';
+  const matchOtherColumn = viewerType === 'adopter' ? 'dog_id' : 'adopter_id';
+  const { data: matched, error: matchedError } = await supabase
+    .from('matches')
+    .select(matchOtherColumn)
+    .eq(matchOwnColumn, viewerId);
+  if (matchedError) throw matchedError;
+  const matchedIds = new Set((matched ?? []).map((m: any) => m[matchOtherColumn]));
+
+  const pendingIds = likedIds.filter((id) => !matchedIds.has(id));
+  if (pendingIds.length === 0) return [];
+
+  const { data, error } = await supabase.from(targetTable).select('*').in('id', pendingIds);
+  if (error) throw error;
+  return data as (Dog | Adopter)[];
+}
+
 export interface RecordSwipeResult {
   matchId: string | null;
 }

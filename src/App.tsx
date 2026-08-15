@@ -5,13 +5,16 @@ import { getOrCreateSessionId, getActiveProfile, setActiveProfile } from './lib/
 import type { ActiveProfile } from './lib/session';
 import { fetchProfile } from './lib/api/profiles';
 import { fetchAcceptedMatches } from './lib/api/matches';
+import type { AcceptedMatch } from './lib/api/matches';
 import { Landing } from './pages/Landing';
 import { CreateProfile } from './pages/CreateProfile';
 import { SwipeDeck } from './pages/SwipeDeck';
 import { MatchPrompt } from './pages/MatchPrompt';
 import { MatchedSection } from './pages/MatchedSection';
+import { Chat } from './pages/Chat';
+import { Liked } from './pages/Liked';
 
-type View = 'landing' | 'create' | 'edit' | 'deck' | 'matched';
+type View = 'landing' | 'create' | 'edit' | 'deck' | 'matched' | 'chat' | 'liked';
 
 interface PendingMatch {
   id: string;
@@ -33,6 +36,7 @@ export default function App() {
   const [pendingMatch, setPendingMatch] = useState<PendingMatch | null>(null);
   const [editingProfile, setEditingProfile] = useState<Dog | Adopter | null>(null);
   const [matchCount, setMatchCount] = useState(0);
+  const [selectedMatch, setSelectedMatch] = useState<AcceptedMatch | null>(null);
 
   useEffect(() => {
     if (!activeProfile) return;
@@ -72,6 +76,17 @@ export default function App() {
     refreshMatchCount();
   }
 
+  function handleOpenMatch(match: AcceptedMatch) {
+    setSelectedMatch(match);
+    setView('chat');
+  }
+
+  function handleMatchClosed() {
+    setSelectedMatch(null);
+    setView('matched');
+    refreshMatchCount();
+  }
+
   function navButtonClass(isActive: boolean) {
     return `flex items-center rounded-full px-3.5 py-2.5 text-left text-sm transition-colors ${
       isActive ? 'bg-clay text-cream' : 'text-ink hover:bg-ink/8'
@@ -95,11 +110,14 @@ export default function App() {
           <button className={navButtonClass(view === 'deck')} onClick={() => setView('deck')}>
             Discover
           </button>
-          <button className={navButtonClass(view === 'matched')} onClick={() => setView('matched')}>
+          <button className={navButtonClass(view === 'matched' || view === 'chat')} onClick={() => setView('matched')}>
             My Matches
             {matchCount > 0 && (
               <span className="ml-2 rounded-full bg-clay px-2 py-px text-[11px] text-cream">{matchCount}</span>
             )}
+          </button>
+          <button className={navButtonClass(view === 'liked')} onClick={() => setView('liked')}>
+            Liked
           </button>
           <button className={navButtonClass(view === 'edit')} onClick={handleEditProfile}>
             Edit Profile
@@ -139,7 +157,18 @@ export default function App() {
             onMatch={(id, otherName) => setPendingMatch({ id, otherName })}
           />
         )}
-        {view === 'matched' && activeProfile && <MatchedSection activeProfile={activeProfile} />}
+        {view === 'matched' && activeProfile && (
+          <MatchedSection activeProfile={activeProfile} onOpenMatch={handleOpenMatch} />
+        )}
+        {view === 'chat' && activeProfile && selectedMatch && (
+          <Chat
+            match={selectedMatch}
+            viewerProfile={activeProfile}
+            onBack={() => setView('matched')}
+            onMatchClosed={handleMatchClosed}
+          />
+        )}
+        {view === 'liked' && activeProfile && <Liked activeProfile={activeProfile} />}
       </main>
 
       {pendingMatch && (

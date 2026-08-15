@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('../../supabaseClient', () => ({ supabase: { from: vi.fn() } }));
 
 import { supabase } from '../../supabaseClient';
-import { recordSwipe } from './swipes';
+import { recordSwipe, fetchLikedProfiles } from './swipes';
 
 describe('recordSwipe', () => {
   it('returns no match when swiping left', async () => {
@@ -47,5 +47,32 @@ describe('recordSwipe', () => {
 
     expect(result.matchId).toBe('match-1');
     expect(matchInsert).toHaveBeenCalledWith({ adopter_id: 'a1', dog_id: 'd1', status: 'pending' });
+  });
+});
+
+describe('fetchLikedProfiles', () => {
+  it('returns right-swiped profiles that have no existing match row yet', async () => {
+    const swipesEq3 = vi.fn().mockResolvedValue({ data: [{ target_id: 'd1' }, { target_id: 'd2' }], error: null });
+    const swipesEq2 = vi.fn().mockReturnValue({ eq: swipesEq3 });
+    const swipesEq1 = vi.fn().mockReturnValue({ eq: swipesEq2 });
+    const swipesSelect = vi.fn().mockReturnValue({ eq: swipesEq1 });
+
+    const matchesEq = vi.fn().mockResolvedValue({ data: [{ dog_id: 'd1' }], error: null });
+    const matchesSelect = vi.fn().mockReturnValue({ eq: matchesEq });
+
+    const dogsIn = vi.fn().mockResolvedValue({ data: [{ id: 'd2', name: 'Nutmeg' }], error: null });
+    const dogsSelect = vi.fn().mockReturnValue({ in: dogsIn });
+
+    (supabase.from as any) = vi.fn((table: string) => {
+      if (table === 'swipes') return { select: swipesSelect };
+      if (table === 'matches') return { select: matchesSelect };
+      if (table === 'dogs') return { select: dogsSelect };
+      throw new Error(`unexpected table ${table}`);
+    });
+
+    const liked = await fetchLikedProfiles('adopter', 'a1');
+
+    expect(liked).toEqual([{ id: 'd2', name: 'Nutmeg' }]);
+    expect(dogsIn).toHaveBeenCalledWith('id', ['d2']);
   });
 });

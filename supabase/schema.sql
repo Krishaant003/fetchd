@@ -43,20 +43,31 @@ create table matches (
   id uuid primary key default gen_random_uuid(),
   adopter_id uuid not null references adopters(id),
   dog_id uuid not null references dogs(id),
-  status text not null default 'pending' check (status in ('pending', 'accepted', 'rejected')),
+  status text not null default 'pending' check (status in ('pending', 'accepted', 'rejected', 'unmatched', 'adopted')),
   created_at timestamptz not null default now(),
   unique (adopter_id, dog_id)
+);
+
+create table messages (
+  id uuid primary key default gen_random_uuid(),
+  match_id uuid not null references matches(id),
+  sender_type text not null check (sender_type in ('adopter', 'dog')),
+  sender_id uuid not null,
+  body text not null,
+  created_at timestamptz not null default now()
 );
 
 alter table adopters enable row level security;
 alter table dogs enable row level security;
 alter table swipes enable row level security;
 alter table matches enable row level security;
+alter table messages enable row level security;
 
 create policy "public read/write adopters" on adopters for all using (true) with check (true);
 create policy "public read/write dogs" on dogs for all using (true) with check (true);
 create policy "public read/write swipes" on swipes for all using (true) with check (true);
 create policy "public read/write matches" on matches for all using (true) with check (true);
+create policy "public read/write messages" on messages for all using (true) with check (true);
 
 -- Storage RLS is separate from table RLS above: the "photos" bucket being
 -- public only controls unauthenticated read of object URLs, not whether the

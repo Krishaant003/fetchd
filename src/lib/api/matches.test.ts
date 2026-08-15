@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('../../supabaseClient', () => ({ supabase: { from: vi.fn() } }));
 
 import { supabase } from '../../supabaseClient';
-import { respondToMatch, fetchAcceptedMatches } from './matches';
+import { respondToMatch, fetchAcceptedMatches, unmatchMatch, markAdopted } from './matches';
 
 describe('respondToMatch', () => {
   it('updates the match status', async () => {
@@ -43,5 +43,31 @@ describe('fetchAcceptedMatches', () => {
     expect(matches).toHaveLength(1);
     expect(matches[0].dog.name).toBe('Rex');
     expect(eq1).toHaveBeenCalledWith('adopter_id', 'a1');
+  });
+});
+
+describe('unmatchMatch', () => {
+  it('sets the match status to unmatched', async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null });
+    const update = vi.fn().mockReturnValue({ eq });
+    (supabase.from as any) = vi.fn(() => ({ update }));
+
+    await unmatchMatch('match-1');
+
+    expect(update).toHaveBeenCalledWith({ status: 'unmatched' });
+    expect(eq).toHaveBeenCalledWith('id', 'match-1');
+  });
+});
+
+describe('markAdopted', () => {
+  it('sets the match status to adopted', async () => {
+    const eq = vi.fn().mockResolvedValue({ error: null });
+    const update = vi.fn().mockReturnValue({ eq });
+    (supabase.from as any) = vi.fn(() => ({ update }));
+
+    await markAdopted('match-1');
+
+    expect(update).toHaveBeenCalledWith({ status: 'adopted' });
+    expect(eq).toHaveBeenCalledWith('id', 'match-1');
   });
 });

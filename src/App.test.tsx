@@ -16,6 +16,12 @@ vi.mock('./lib/api/swipes', () => ({
 vi.mock('./lib/api/matches', () => ({
   fetchAcceptedMatches: vi.fn().mockResolvedValue([]),
   respondToMatch: vi.fn(),
+  unmatchMatch: vi.fn(),
+  markAdopted: vi.fn(),
+}));
+vi.mock('./lib/api/messages', () => ({
+  fetchMessages: vi.fn().mockResolvedValue([]),
+  sendMessage: vi.fn(),
 }));
 
 import App from './App';

@@ -63,12 +63,21 @@ export interface Swipe {
   created_at: string;
 }
 
-export type MatchStatus = 'pending' | 'accepted' | 'rejected';
+export type MatchStatus = 'pending' | 'accepted' | 'rejected' | 'unmatched' | 'adopted';
 
 export interface Match {
   id: string;
   adopter_id: string;
   dog_id: string;
   status: MatchStatus;
+  created_at: string;
+}
+
+export interface Message {
+  id: string;
+  match_id: string;
+  sender_type: ProfileType;
+  sender_id: string;
+  body: string;
   created_at: string;
 }

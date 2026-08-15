@@ -5,13 +5,14 @@ import type { AcceptedMatch } from '../lib/api/matches';
 
 interface MatchedSectionProps {
   activeProfile: ActiveProfile;
+  onOpenMatch: (match: AcceptedMatch) => void;
 }
 
 function formatMatchedOn(isoDate: string): string {
   return new Date(isoDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-export function MatchedSection({ activeProfile }: MatchedSectionProps) {
+export function MatchedSection({ activeProfile, onOpenMatch }: MatchedSectionProps) {
   const [matches, setMatches] = useState<AcceptedMatch[]>([]);
 
   useEffect(() => {
@@ -30,14 +31,19 @@ export function MatchedSection({ activeProfile }: MatchedSectionProps) {
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4.5">
-          {matches.map(({ match, dog, adopter }) => {
+          {matches.map((acceptedMatch) => {
+            const { match, dog, adopter } = acceptedMatch;
             const other = activeProfile.type === 'dog' ? adopter : dog;
             return (
-              <div key={match.id} className="rounded-lg bg-surface p-4.5 shadow-sm">
+              <button
+                key={match.id}
+                onClick={() => onOpenMatch(acceptedMatch)}
+                className="rounded-lg bg-surface p-4.5 text-left shadow-sm hover:shadow-md"
+              >
                 <img src={other.photo_urls[0]} alt="" className="mb-3 aspect-4/3 w-full rounded-md object-cover" />
                 <div className="font-heading text-lg">{other.name}</div>
                 <div className="text-xs text-ink/65">Matched {formatMatchedOn(match.created_at)}</div>
-              </div>
+              </button>
             );
           })}
         </div>
