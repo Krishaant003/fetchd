@@ -1,4 +1,4 @@
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-flash-latest';
 
 function endpoint(): string {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;

@@ -49,3 +49,10 @@ create policy "public read/write adopters" on adopters for all using (true) with
 create policy "public read/write dogs" on dogs for all using (true) with check (true);
 create policy "public read/write swipes" on swipes for all using (true) with check (true);
 create policy "public read/write matches" on matches for all using (true) with check (true);
+
+-- Storage RLS is separate from table RLS above: the "photos" bucket being
+-- public only controls unauthenticated read of object URLs, not whether the
+-- anon key can upload/delete via the storage API. Open that up the same way.
+create policy "public read/write photos bucket" on storage.objects for all
+  using (bucket_id = 'photos')
+  with check (bucket_id = 'photos');
