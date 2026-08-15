@@ -1,5 +1,5 @@
 import { supabase } from '../../supabaseClient';
-import { Adopter, Dog, ProfileType } from '../../types';
+import type { Adopter, Dog, ProfileType } from '../../types';
 
 export async function fetchDeck(viewerType: ProfileType, viewerId: string): Promise<(Dog | Adopter)[]> {
   const targetType: ProfileType = viewerType === 'dog' ? 'adopter' : 'dog';

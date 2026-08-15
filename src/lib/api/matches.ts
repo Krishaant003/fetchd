@@ -1,5 +1,5 @@
 import { supabase } from '../../supabaseClient';
-import { Adopter, Dog, Match, MatchStatus, ProfileType } from '../../types';
+import type { Adopter, Dog, Match, MatchStatus, ProfileType } from '../../types';
 
 export type MatchDecision = Extract<MatchStatus, 'accepted' | 'rejected'>;
 

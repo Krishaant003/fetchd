@@ -1,4 +1,4 @@
-import { Adopter } from '../types';
+import type { Adopter } from '../types';
 
 interface AdopterCardProps {
   adopter: Adopter;

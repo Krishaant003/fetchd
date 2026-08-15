@@ -1,4 +1,4 @@
-import { ProfileType } from '../types';
+import type { ProfileType } from '../types';
 
 const SESSION_ID_KEY = 'dogmatch_session_id';
 const ACTIVE_PROFILE_KEY = 'dogmatch_active_profile';

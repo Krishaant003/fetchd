@@ -1,5 +1,5 @@
 import { supabase } from '../../supabaseClient';
-import { Adopter, Dog, ProfileType } from '../../types';
+import type { Adopter, Dog, ProfileType } from '../../types';
 
 export interface CreateDogInput {
   session_id: string;

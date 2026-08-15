@@ -1,4 +1,4 @@
-import { Dog } from '../types';
+import type { Dog } from '../types';
 
 interface DogCardProps {
   dog: Dog;
