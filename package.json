@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "cross-env NODE_OPTIONS=--no-experimental-webstorage vitest run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
@@ -24,6 +24,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "cross-env": "^10.1.0",
     "jsdom": "^29.1.1",
     "oxlint": "^1.75.0",
     "tailwindcss": "^4.3.3",
