@@ -34,8 +34,17 @@ describe('App', () => {
   it('starts on the landing page and navigates to profile creation', async () => {
     render(<App />);
     expect(screen.getByRole('heading', { name: "Fetch'd" })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/');
 
     await userEvent.click(screen.getByText("I'm a Dog"));
     expect(screen.getByText('Create an intake profile')).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/join/dog');
+  });
+
+  it('redirects an unauthenticated visit to a protected route back to landing', () => {
+    window.history.pushState({}, '', '/discover');
+    render(<App />);
+    expect(screen.getByRole('heading', { name: "Fetch'd" })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/');
   });
 });
