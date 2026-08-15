@@ -19,12 +19,18 @@ function navLinkClass({ isActive }: { isActive: boolean }): string {
   }`;
 }
 
+function bottomNavLinkClass({ isActive }: { isActive: boolean }): string {
+  return `flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[11px] transition-colors ${
+    isActive ? 'text-clay' : 'text-ink/60'
+  }`;
+}
+
 export function AppShell({ activeProfile, profileName, matchCount }: AppShellProps) {
   if (!activeProfile) return <Navigate to="/" replace />;
 
   return (
     <div className="flex min-h-screen">
-      <aside className="flex w-59 shrink-0 flex-col gap-1.5 border-r border-divider bg-surface px-5 py-7">
+      <aside className="hidden w-59 shrink-0 flex-col gap-1.5 border-r border-divider bg-surface px-5 py-7 md:flex">
         <div className="mb-7">
           <Logo variant="row" />
         </div>
@@ -50,9 +56,31 @@ export function AppShell({ activeProfile, profileName, matchCount }: AppShellPro
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto" style={CANVAS_BACKGROUND}>
+      <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={CANVAS_BACKGROUND}>
         <Outlet />
       </main>
+
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-around border-t border-divider bg-surface px-2 py-1.5 md:hidden">
+        <NavLink to="/discover" className={bottomNavLinkClass}>
+          Discover
+        </NavLink>
+        <NavLink to="/matches" className={bottomNavLinkClass}>
+          <span className="relative">
+            Matches
+            {matchCount > 0 && (
+              <span className="absolute -right-2.5 -top-1 rounded-full bg-clay px-1.5 text-[9px] text-cream">
+                {matchCount}
+              </span>
+            )}
+          </span>
+        </NavLink>
+        <NavLink to="/liked" className={bottomNavLinkClass}>
+          Liked
+        </NavLink>
+        <NavLink to="/profile/edit" className={bottomNavLinkClass}>
+          Profile
+        </NavLink>
+      </nav>
     </div>
   );
 }

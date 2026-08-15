@@ -64,12 +64,12 @@ export function Chat({ match, viewerProfile, onBack, onMatchClosed }: ChatProps)
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-10 py-11">
+    <div className="mx-auto max-w-3xl px-4 py-6 md:px-10 md:py-11">
       <button onClick={onBack} className="mb-5 text-sm text-clay-700">
         ← Back to matches
       </button>
 
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <img src={other.photo_urls[0]} alt="" className="h-11 w-11 rounded-full object-cover" />
           <div>

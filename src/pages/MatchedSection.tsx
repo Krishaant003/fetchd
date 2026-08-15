@@ -20,14 +20,14 @@ export function MatchedSection({ activeProfile, onOpenMatch }: MatchedSectionPro
   }, [activeProfile]);
 
   return (
-    <div className="mx-auto max-w-4xl px-10 py-12">
+    <div className="mx-auto max-w-4xl px-5 py-8 md:px-10 md:py-12">
       <h1 className="mb-1.5 font-heading text-3xl">My Matches</h1>
-      <p className="mb-7 text-sm text-ink/70">Confirmed both ways — say hello.</p>
+      <p className="mb-7 text-sm text-ink/70">Confirmed both ways say hello.</p>
 
       {matches.length === 0 ? (
         <div className="rounded-lg bg-surface px-10 py-15 text-center">
           <div className="mb-1.5 font-heading text-xl">No matches yet</div>
-          <p className="text-sm text-ink/70">Keep swiping in Discover — mutual interest shows up here.</p>
+          <p className="text-sm text-ink/70">Keep swiping in Discover  mutual interest shows up here.</p>
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4.5">

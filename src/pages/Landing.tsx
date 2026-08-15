@@ -16,7 +16,7 @@ export function Landing({
   onContinue,
 }: LandingProps) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-10 py-10 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-10 text-center sm:px-10">
       <div className="mb-1.5">
         <Logo variant="stacked" />
       </div>
@@ -25,10 +25,10 @@ export function Landing({
         Where dogs swipe back.
       </p>
 
-      <div className="flex flex-col gap-5 sm:flex-row">
+      <div className="flex w-full max-w-135 flex-col gap-5 sm:flex-row">
         <button
           onClick={() => onPickMode("dog")}
-          className="w-65 rounded-lg border-2 border-clay bg-clay-100 p-6 text-left transition-colors hover:bg-clay-200"
+          className="w-full rounded-lg border-2 border-clay bg-clay-100 p-6 text-left transition-colors hover:bg-clay-200 sm:w-65"
         >
           <div className="mb-3.5 h-10 w-10 rounded-full bg-clay" />
           <div className="mb-1.5 font-heading text-xl text-clay-800">
@@ -40,7 +40,7 @@ export function Landing({
         </button>
         <button
           onClick={() => onPickMode("adopter")}
-          className="w-65 rounded-lg border-2 border-sage bg-sage-100 p-6 text-left transition-colors hover:bg-sage-200"
+          className="w-full rounded-lg border-2 border-sage bg-sage-100 p-6 text-left transition-colors hover:bg-sage-200 sm:w-65"
         >
           <div className="mb-3.5 h-10 w-10 rounded-full bg-sage" />
           <div className="mb-1.5 font-heading text-xl text-sage-800">

@@ -19,7 +19,7 @@ export function Liked({ activeProfile }: LikedProps) {
   }, [activeProfile]);
 
   return (
-    <div className="mx-auto max-w-4xl px-10 py-12">
+    <div className="mx-auto max-w-4xl px-5 py-8 md:px-10 md:py-12">
       <h1 className="mb-1.5 font-heading text-3xl">Liked</h1>
       <p className="mb-7 text-sm text-ink/70">Profiles you swiped Interested on that haven't matched yet.</p>
 

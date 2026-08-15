@@ -10,11 +10,8 @@ export function DogCard({ dog }: DogCardProps) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
   return (
-    <div
-      className="grid overflow-hidden rounded-[calc(var(--radius-lg)*1.15)] bg-surface shadow-lg md:grid-cols-[380px_1fr]"
-      style={{ height: 560 }}
-    >
-      <div className="relative h-full overflow-hidden">
+    <div className="flex flex-col overflow-hidden rounded-[calc(var(--radius-lg)*1.15)] bg-surface shadow-lg md:grid md:h-140 md:grid-cols-[380px_1fr]">
+      <div className="relative h-72 overflow-hidden md:h-full">
         <div className="absolute left-3.5 right-3.5 top-3.5 z-10 flex gap-1.25">
           {dog.photo_urls.map((_, i) => (
             <div key={i} className={`h-0.75 flex-1 rounded-full ${i === photoIndex ? 'bg-white' : 'bg-white/38'}`} />
@@ -41,8 +38,8 @@ export function DogCard({ dog }: DogCardProps) {
         </div>
       </div>
 
-      <div className="flex h-full min-w-0 flex-col px-6.5 pb-5.5 pt-19.5">
-        <div className="flex flex-1 flex-col gap-3.5 overflow-y-auto pr-1">
+      <div className="flex min-w-0 flex-col px-5 py-5 md:h-full md:px-6.5 md:pb-5.5 md:pt-19.5">
+        <div className="flex flex-1 flex-col gap-3.5 md:overflow-y-auto md:pr-1">
           {DOG_QUESTIONS.map((question, i) => (
             <div key={question.label}>
               <div className="mb-1 text-[11px] uppercase tracking-wide text-clay-700">{question.label}</div>

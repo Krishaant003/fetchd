@@ -28,7 +28,7 @@ export function MatchPrompt({ matchId, otherName, onResolved }: MatchPromptProps
         </div>
         <h2 className="mb-1.5 font-heading text-xl">You and {otherName} both said yes</h2>
         <p className="mb-6 text-[13.5px] text-ink/75">
-          Confirm to add this to Matches for both of you — reject and it won't come up again.
+          Confirm to add this to Matches for both of you  reject and it won't come up again.
         </p>
         <div className="flex gap-3">
           <button

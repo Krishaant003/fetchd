@@ -134,7 +134,7 @@ export function CreateProfile({ sessionId, profileType, existingProfile, onCreat
   const submitLabel = submitting ? 'Submitting…' : isEditing ? 'Save changes' : "Enter Fetch'd";
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-4xl px-10 py-12">
+    <form onSubmit={handleSubmit} className="mx-auto max-w-4xl px-5 py-8 md:px-10 md:py-12">
       <h1 className="mb-1 font-heading text-3xl">{title}</h1>
       <p className="mb-8 text-sm text-ink/70">{subtitle}</p>
 

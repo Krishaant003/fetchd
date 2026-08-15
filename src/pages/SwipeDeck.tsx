@@ -45,7 +45,7 @@ export function SwipeDeck({ activeProfile, viewerText, onMatch }: SwipeDeckProps
   }
 
   return (
-    <div className="mx-auto max-w-190 px-10 py-11">
+    <div className="mx-auto max-w-190 px-4 py-6 md:px-10 md:py-11">
       <div className="mb-4.5 flex items-baseline justify-between">
         <h1 className="font-heading text-2xl">Discover</h1>
         {current && (
@@ -56,8 +56,8 @@ export function SwipeDeck({ activeProfile, viewerText, onMatch }: SwipeDeckProps
       </div>
 
       {current ? (
-        <div className="relative mt-17">
-          <div className="absolute -top-16 -right-6 z-10 w-57.5 rotate-6 rounded-md border border-sage-700/40 bg-sage-100 px-3.5 py-2.5 shadow-md">
+        <div className="relative md:mt-17">
+          <div className="mb-4 rounded-md border border-sage-700/40 bg-sage-100 px-3.5 py-2.5 shadow-md md:absolute md:-top-16 md:-right-6 md:z-10 md:mb-0 md:w-57.5 md:rotate-6">
             <div className="mb-1 text-[9px] uppercase tracking-wide text-sage-700">Compatibility note</div>
             {noteLoading ? (
               <div className="flex items-center gap-2 text-xs text-ink/70">
@@ -94,7 +94,7 @@ export function SwipeDeck({ activeProfile, viewerText, onMatch }: SwipeDeckProps
           </div>
         </div>
       ) : (
-        <div className="rounded-lg bg-surface px-10 py-15 text-center">
+        <div className="rounded-lg bg-surface px-6 py-10 text-center md:px-10 md:py-15">
           <div className="mb-2 font-heading text-xl">That's everyone for now</div>
           <p className="text-sm text-ink/70">Check back later for new profiles, or revisit your matches.</p>
         </div>
