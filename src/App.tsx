@@ -13,6 +13,7 @@ import { MatchPrompt } from './pages/MatchPrompt';
 import { MatchedSection } from './pages/MatchedSection';
 import { Chat } from './pages/Chat';
 import { Liked } from './pages/Liked';
+import { Logo } from './components/Logo';
 
 type View = 'landing' | 'create' | 'edit' | 'deck' | 'matched' | 'chat' | 'liked';
 
@@ -99,13 +100,8 @@ export default function App() {
     <div className="flex min-h-screen">
       {isEnteredApp && (
         <aside className="flex w-59 shrink-0 flex-col gap-1.5 border-r border-divider bg-surface px-5 py-7">
-          <div className="mb-7 flex items-center gap-2.5">
-            <div className="relative h-8.5 w-8.5">
-              <div className="absolute bottom-0 right-0 h-5.5 w-5.5 rounded-full bg-clay" />
-              <div className="absolute left-0.5 top-0 h-2.25 w-2.25 rounded-full bg-sage" />
-              <div className="absolute left-4 top-0.5 h-2.25 w-2.25 rounded-full bg-sage" />
-            </div>
-            <div className="font-heading text-lg">Fetch Match</div>
+          <div className="mb-7">
+            <Logo variant="row" />
           </div>
           <button className={navButtonClass(view === 'deck')} onClick={() => setView('deck')}>
             Discover

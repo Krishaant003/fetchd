@@ -33,7 +33,7 @@ describe('App', () => {
 
   it('starts on the landing page and navigates to profile creation', async () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Fetch Match' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: "Fetch'd" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByText("I'm a Dog"));
     expect(screen.getByText('Create an intake profile')).toBeInTheDocument();

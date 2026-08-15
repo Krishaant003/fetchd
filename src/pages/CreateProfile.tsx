@@ -131,7 +131,7 @@ export function CreateProfile({ sessionId, profileType, existingProfile, onCreat
 
   const title = isEditing ? 'Edit profile' : isDog ? 'Create an intake profile' : 'Create your application';
   const subtitle = isEditing ? 'Update any field, then save.' : 'Four photos and five quick questions — take your time.';
-  const submitLabel = submitting ? 'Submitting…' : isEditing ? 'Save changes' : 'Enter Fetch Match';
+  const submitLabel = submitting ? 'Submitting…' : isEditing ? 'Save changes' : "Enter Fetch'd";
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-4xl px-10 py-12">

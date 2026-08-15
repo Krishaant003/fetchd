@@ -45,7 +45,7 @@ describe('CreateProfile', () => {
       await userEvent.upload(screen.getByLabelText(`photo ${i}`), file);
     }
 
-    await userEvent.click(screen.getByText('Enter Fetch Match'));
+    await userEvent.click(screen.getByText("Enter Fetch'd"));
 
     expect(screen.getByText(/slot 4 — required/i)).toBeInTheDocument();
   });
@@ -56,7 +56,7 @@ describe('CreateProfile', () => {
 
     await fillRequiredTextFields();
     await uploadAllPhotos();
-    await userEvent.click(screen.getByText('Enter Fetch Match'));
+    await userEvent.click(screen.getByText("Enter Fetch'd"));
 
     await waitFor(() => expect(onCreated).toHaveBeenCalledWith({ type: 'dog', id: 'd1' }, 'a1 a2 a3 a4 a5'));
   });
