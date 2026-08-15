@@ -4,8 +4,12 @@ create table adopters (
   id uuid primary key default gen_random_uuid(),
   session_id text not null,
   name text not null,
-  photo_url text not null,
-  lifestyle_text text not null,
+  photo_urls text[] not null check (array_length(photo_urls, 1) = 4),
+  answer_1 text not null,
+  answer_2 text not null,
+  answer_3 text not null,
+  answer_4 text not null,
+  answer_5 text not null,
   created_at timestamptz not null default now()
 );
 
@@ -15,8 +19,12 @@ create table dogs (
   name text not null,
   breed text not null,
   age text not null,
-  story text not null,
-  photo_url text not null,
+  photo_urls text[] not null check (array_length(photo_urls, 1) = 4),
+  answer_1 text not null,
+  answer_2 text not null,
+  answer_3 text not null,
+  answer_4 text not null,
+  answer_5 text not null,
   created_at timestamptz not null default now()
 );
 

@@ -5,8 +5,8 @@ vi.mock('../lib/api/matches', () => ({
   fetchAcceptedMatches: vi.fn().mockResolvedValue([
     {
       match: { id: 'm1', adopter_id: 'a1', dog_id: 'd1', status: 'accepted', created_at: '2026-08-15T00:00:00Z' },
-      dog: { id: 'd1', name: 'Rex', photo_url: 'https://example.com/rex.jpg' },
-      adopter: { id: 'a1', name: 'Jo', photo_url: 'https://example.com/jo.jpg' },
+      dog: { id: 'd1', name: 'Rex', photo_urls: ['https://example.com/rex.jpg'] },
+      adopter: { id: 'a1', name: 'Jo', photo_urls: ['https://example.com/jo.jpg'] },
     },
   ]),
 }));

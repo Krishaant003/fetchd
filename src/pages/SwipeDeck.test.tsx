@@ -9,8 +9,17 @@ const { dog } = vi.hoisted(() => ({
     name: 'Rex',
     breed: 'Mutt',
     age: '2',
-    story: 'Loves parks',
-    photo_url: 'https://example.com/rex.jpg',
+    photo_urls: [
+      'https://example.com/rex1.jpg',
+      'https://example.com/rex2.jpg',
+      'https://example.com/rex3.jpg',
+      'https://example.com/rex4.jpg',
+    ],
+    answer_1: 'Loves parks',
+    answer_2: 'High energy',
+    answer_3: 'Friendly',
+    answer_4: 'No known fears',
+    answer_5: 'A home with a yard',
     created_at: '2026-08-15T00:00:00Z',
   },
 }));
@@ -40,9 +49,9 @@ describe('SwipeDeck', () => {
     expect(await screen.findByText('Rex')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('You both love the outdoors.')).toBeInTheDocument());
 
-    await userEvent.click(screen.getByText('Interested'));
+    await userEvent.click(screen.getByLabelText('Interested'));
 
     expect(recordSwipe).toHaveBeenCalledWith('adopter', 'a1', 'dog', 'd1', 'right');
-    await waitFor(() => expect(onMatch).toHaveBeenCalledWith('match-1'));
+    await waitFor(() => expect(onMatch).toHaveBeenCalledWith('match-1', 'Rex'));
   });
 });

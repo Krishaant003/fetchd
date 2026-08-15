@@ -1,20 +1,40 @@
 import { supabase } from '../../supabaseClient';
 import type { Adopter, Dog, ProfileType } from '../../types';
 
+export type Answers = [string, string, string, string, string];
+export type PhotoSlot = File | string;
+export type PhotoSlots = [PhotoSlot, PhotoSlot, PhotoSlot, PhotoSlot];
+
 export interface CreateDogInput {
   session_id: string;
   name: string;
   breed: string;
   age: string;
-  story: string;
-  photo: File;
+  answers: Answers;
+  photos: [File, File, File, File];
 }
 
 export interface CreateAdopterInput {
   session_id: string;
   name: string;
-  lifestyle_text: string;
-  photo: File;
+  answers: Answers;
+  photos: [File, File, File, File];
+}
+
+export interface UpdateDogInput {
+  id: string;
+  name: string;
+  breed: string;
+  age: string;
+  answers: Answers;
+  photos: PhotoSlots;
+}
+
+export interface UpdateAdopterInput {
+  id: string;
+  name: string;
+  answers: Answers;
+  photos: PhotoSlots;
 }
 
 async function uploadPhoto(photo: File): Promise<string> {
@@ -25,8 +45,23 @@ async function uploadPhoto(photo: File): Promise<string> {
   return data.publicUrl;
 }
 
+async function uploadPhotos(photos: [File, File, File, File]): Promise<[string, string, string, string]> {
+  const urls = await Promise.all(photos.map(uploadPhoto));
+  return urls as [string, string, string, string];
+}
+
+async function resolvePhotoSlots(photos: PhotoSlots): Promise<[string, string, string, string]> {
+  const urls = await Promise.all(photos.map((slot) => (typeof slot === 'string' ? slot : uploadPhoto(slot))));
+  return urls as [string, string, string, string];
+}
+
+function answersToColumns(answers: Answers) {
+  const [answer_1, answer_2, answer_3, answer_4, answer_5] = answers;
+  return { answer_1, answer_2, answer_3, answer_4, answer_5 };
+}
+
 export async function createDogProfile(input: CreateDogInput): Promise<Dog> {
-  const photo_url = await uploadPhoto(input.photo);
+  const photo_urls = await uploadPhotos(input.photos);
   const { data, error } = await supabase
     .from('dogs')
     .insert({
@@ -34,8 +69,8 @@ export async function createDogProfile(input: CreateDogInput): Promise<Dog> {
       name: input.name,
       breed: input.breed,
       age: input.age,
-      story: input.story,
-      photo_url,
+      photo_urls,
+      ...answersToColumns(input.answers),
     })
     .select()
     .single();
@@ -44,14 +79,14 @@ export async function createDogProfile(input: CreateDogInput): Promise<Dog> {
 }
 
 export async function createAdopterProfile(input: CreateAdopterInput): Promise<Adopter> {
-  const photo_url = await uploadPhoto(input.photo);
+  const photo_urls = await uploadPhotos(input.photos);
   const { data, error } = await supabase
     .from('adopters')
     .insert({
       session_id: input.session_id,
       name: input.name,
-      lifestyle_text: input.lifestyle_text,
-      photo_url,
+      photo_urls,
+      ...answersToColumns(input.answers),
     })
     .select()
     .single();
@@ -59,13 +94,52 @@ export async function createAdopterProfile(input: CreateAdopterInput): Promise<A
   return data as Adopter;
 }
 
-export async function fetchProfileText(type: ProfileType, id: string): Promise<string> {
-  if (type === 'dog') {
-    const { data, error } = await supabase.from('dogs').select('story').eq('id', id).single();
-    if (error) throw error;
-    return data.story;
-  }
-  const { data, error } = await supabase.from('adopters').select('lifestyle_text').eq('id', id).single();
+export async function updateDogProfile(input: UpdateDogInput): Promise<Dog> {
+  const photo_urls = await resolvePhotoSlots(input.photos);
+  const { data, error } = await supabase
+    .from('dogs')
+    .update({
+      name: input.name,
+      breed: input.breed,
+      age: input.age,
+      photo_urls,
+      ...answersToColumns(input.answers),
+    })
+    .eq('id', input.id)
+    .select()
+    .single();
   if (error) throw error;
-  return data.lifestyle_text;
+  return data as Dog;
+}
+
+export async function updateAdopterProfile(input: UpdateAdopterInput): Promise<Adopter> {
+  const photo_urls = await resolvePhotoSlots(input.photos);
+  const { data, error } = await supabase
+    .from('adopters')
+    .update({
+      name: input.name,
+      photo_urls,
+      ...answersToColumns(input.answers),
+    })
+    .eq('id', input.id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Adopter;
+}
+
+export async function fetchDogProfile(id: string): Promise<Dog> {
+  const { data, error } = await supabase.from('dogs').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data as Dog;
+}
+
+export async function fetchAdopterProfile(id: string): Promise<Adopter> {
+  const { data, error } = await supabase.from('adopters').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data as Adopter;
+}
+
+export async function fetchProfile(type: ProfileType, id: string): Promise<Dog | Adopter> {
+  return type === 'dog' ? fetchDogProfile(id) : fetchAdopterProfile(id);
 }

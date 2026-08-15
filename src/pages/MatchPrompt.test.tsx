@@ -10,11 +10,13 @@ import { MatchPrompt } from './MatchPrompt';
 import { respondToMatch } from '../lib/api/matches';
 
 describe('MatchPrompt', () => {
-  it('accepts the match and calls onResolved', async () => {
+  it('shows the other party name and accepts the match', async () => {
     const onResolved = vi.fn();
-    render(<MatchPrompt matchId="match-1" onResolved={onResolved} />);
+    render(<MatchPrompt matchId="match-1" otherName="Biscuit" onResolved={onResolved} />);
 
-    await userEvent.click(screen.getByText('Accept'));
+    expect(screen.getByText('You and Biscuit both said yes')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText('Confirm match'));
 
     expect(respondToMatch).toHaveBeenCalledWith('match-1', 'accepted');
     await waitFor(() => expect(onResolved).toHaveBeenCalled());
@@ -22,9 +24,9 @@ describe('MatchPrompt', () => {
 
   it('rejects the match and calls onResolved', async () => {
     const onResolved = vi.fn();
-    render(<MatchPrompt matchId="match-1" onResolved={onResolved} />);
+    render(<MatchPrompt matchId="match-1" otherName="Biscuit" onResolved={onResolved} />);
 
-    await userEvent.click(screen.getByText('Not now'));
+    await userEvent.click(screen.getByText('Not this time'));
 
     expect(respondToMatch).toHaveBeenCalledWith('match-1', 'rejected');
     await waitFor(() => expect(onResolved).toHaveBeenCalled());

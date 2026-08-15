@@ -1,1 +1,77 @@
 @import "tailwindcss";
+
+@theme {
+  --font-heading: "Caprasimo", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, sans-serif;
+
+  --color-cream: #f5ead8;
+  --color-surface: #ebddc5;
+  --color-surface-2: #f9f4ed;
+  --color-ink: #201e1d;
+  --color-divider: rgba(32, 30, 29, 0.16);
+
+  --color-clay: #c67139;
+  --color-clay-100: #fff2eb;
+  --color-clay-200: #ffe1d0;
+  --color-clay-600: #b2622d;
+  --color-clay-700: #8c491a;
+  --color-clay-800: #643312;
+
+  --color-sage: #7a8a5e;
+  --color-sage-100: #f0fae1;
+  --color-sage-200: #e1eecc;
+  --color-sage-600: #728157;
+  --color-sage-700: #56633f;
+  --color-sage-800: #3d472b;
+
+  --color-stone-200: #eee7db;
+  --color-stone-300: #dcd3c4;
+  --color-stone-700: #645c50;
+  --color-stone-900: #2e2b25;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+
+  --shadow-sm: 0 1px 2px rgba(46, 43, 37, 0.14);
+  --shadow-md: 0 3px 10px rgba(46, 43, 37, 0.16);
+  --shadow-lg: 0 12px 32px rgba(46, 43, 37, 0.22);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes stamp-in {
+  0% {
+    transform: scale(2.2) rotate(-18deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.94) rotate(-7deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-7deg);
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

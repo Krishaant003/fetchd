@@ -11,11 +11,18 @@ describe('Landing', () => {
     expect(onPickMode).toHaveBeenCalledWith('dog');
   });
 
-  it('shows a Continue button only when there is an active profile', () => {
+  it('shows a Continue link with the profile name only when there is an active profile', () => {
     const { rerender } = render(<Landing activeProfile={null} onPickMode={vi.fn()} onContinue={vi.fn()} />);
-    expect(screen.queryByText('Continue')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Continue as/)).not.toBeInTheDocument();
 
-    rerender(<Landing activeProfile={{ type: 'dog', id: 'd1' }} onPickMode={vi.fn()} onContinue={vi.fn()} />);
-    expect(screen.getByText('Continue')).toBeInTheDocument();
+    rerender(
+      <Landing
+        activeProfile={{ type: 'dog', id: 'd1' }}
+        profileName="Biscuit"
+        onPickMode={vi.fn()}
+        onContinue={vi.fn()}
+      />
+    );
+    expect(screen.getByText('Continue as Biscuit')).toBeInTheDocument();
   });
 });

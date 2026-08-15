@@ -1,122 +1,150 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from 'react';
+import type { Adopter, Dog, ProfileType } from './types';
+import { combineAnswers } from './types';
+import { getOrCreateSessionId, getActiveProfile, setActiveProfile } from './lib/session';
+import type { ActiveProfile } from './lib/session';
+import { fetchProfile } from './lib/api/profiles';
+import { fetchAcceptedMatches } from './lib/api/matches';
+import { Landing } from './pages/Landing';
+import { CreateProfile } from './pages/CreateProfile';
+import { SwipeDeck } from './pages/SwipeDeck';
+import { MatchPrompt } from './pages/MatchPrompt';
+import { MatchedSection } from './pages/MatchedSection';
 
-function App() {
-  const [count, setCount] = useState(0)
+type View = 'landing' | 'create' | 'edit' | 'deck' | 'matched';
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+interface PendingMatch {
+  id: string;
+  otherName: string;
 }
 
-export default App
+const CANVAS_BACKGROUND = {
+  backgroundImage: 'radial-gradient(rgba(32,30,29,0.10) 1.6px, transparent 1.6px)',
+  backgroundSize: '22px 22px',
+};
+
+export default function App() {
+  const [sessionId] = useState(getOrCreateSessionId);
+  const [activeProfile, setActiveProfileState] = useState<ActiveProfile | null>(getActiveProfile);
+  const [profileName, setProfileName] = useState('');
+  const [viewerText, setViewerText] = useState('');
+  const [pendingType, setPendingType] = useState<ProfileType>('dog');
+  const [view, setView] = useState<View>('landing');
+  const [pendingMatch, setPendingMatch] = useState<PendingMatch | null>(null);
+  const [editingProfile, setEditingProfile] = useState<Dog | Adopter | null>(null);
+  const [matchCount, setMatchCount] = useState(0);
+
+  useEffect(() => {
+    if (!activeProfile) return;
+    fetchProfile(activeProfile.type, activeProfile.id).then((profile) => {
+      setProfileName(profile.name);
+      setViewerText(combineAnswers(profile));
+    });
+    refreshMatchCount();
+  }, [activeProfile]);
+
+  function refreshMatchCount() {
+    if (!activeProfile) return;
+    fetchAcceptedMatches(activeProfile.type, activeProfile.id).then((matches) => setMatchCount(matches.length));
+  }
+
+  function handlePickMode(type: ProfileType) {
+    setPendingType(type);
+    setView('create');
+  }
+
+  function handleCreated(profile: ActiveProfile, text: string) {
+    setActiveProfile(profile);
+    setActiveProfileState(profile);
+    setViewerText(text);
+    setView('deck');
+  }
+
+  async function handleEditProfile() {
+    if (!activeProfile) return;
+    const profile = await fetchProfile(activeProfile.type, activeProfile.id);
+    setEditingProfile(profile);
+    setView('edit');
+  }
+
+  function handleMatchResolved() {
+    setPendingMatch(null);
+    refreshMatchCount();
+  }
+
+  function navButtonClass(isActive: boolean) {
+    return `flex items-center rounded-full px-3.5 py-2.5 text-left text-sm transition-colors ${
+      isActive ? 'bg-clay text-cream' : 'text-ink hover:bg-ink/8'
+    }`;
+  }
+
+  const isEnteredApp = activeProfile !== null && view !== 'landing';
+
+  return (
+    <div className="flex min-h-screen">
+      {isEnteredApp && (
+        <aside className="flex w-59 shrink-0 flex-col gap-1.5 border-r border-divider bg-surface px-5 py-7">
+          <div className="mb-7 flex items-center gap-2.5">
+            <div className="relative h-8.5 w-8.5">
+              <div className="absolute bottom-0 right-0 h-5.5 w-5.5 rounded-full bg-clay" />
+              <div className="absolute left-0.5 top-0 h-2.25 w-2.25 rounded-full bg-sage" />
+              <div className="absolute left-4 top-0.5 h-2.25 w-2.25 rounded-full bg-sage" />
+            </div>
+            <div className="font-heading text-lg">Fetch Match</div>
+          </div>
+          <button className={navButtonClass(view === 'deck')} onClick={() => setView('deck')}>
+            Discover
+          </button>
+          <button className={navButtonClass(view === 'matched')} onClick={() => setView('matched')}>
+            My Matches
+            {matchCount > 0 && (
+              <span className="ml-2 rounded-full bg-clay px-2 py-px text-[11px] text-cream">{matchCount}</span>
+            )}
+          </button>
+          <button className={navButtonClass(view === 'edit')} onClick={handleEditProfile}>
+            Edit Profile
+          </button>
+          <div className="mt-auto border-t border-divider pt-4.5 text-xs text-ink/55">
+            Signed in as
+            <br />
+            <strong className="text-ink">{profileName}</strong> · {activeProfile.type === 'dog' ? 'Dog' : 'Adopter'}
+          </div>
+        </aside>
+      )}
+
+      <main className="flex-1 overflow-y-auto" style={CANVAS_BACKGROUND}>
+        {view === 'landing' && (
+          <Landing
+            activeProfile={activeProfile}
+            profileName={profileName}
+            onPickMode={handlePickMode}
+            onContinue={() => setView('deck')}
+          />
+        )}
+        {view === 'create' && (
+          <CreateProfile sessionId={sessionId} profileType={pendingType} onCreated={handleCreated} />
+        )}
+        {view === 'edit' && activeProfile && editingProfile && (
+          <CreateProfile
+            sessionId={sessionId}
+            profileType={activeProfile.type}
+            existingProfile={editingProfile}
+            onCreated={handleCreated}
+          />
+        )}
+        {view === 'deck' && activeProfile && (
+          <SwipeDeck
+            activeProfile={activeProfile}
+            viewerText={viewerText}
+            onMatch={(id, otherName) => setPendingMatch({ id, otherName })}
+          />
+        )}
+        {view === 'matched' && activeProfile && <MatchedSection activeProfile={activeProfile} />}
+      </main>
+
+      {pendingMatch && (
+        <MatchPrompt matchId={pendingMatch.id} otherName={pendingMatch.otherName} onResolved={handleMatchResolved} />
+      )}
+    </div>
+  );
+}
