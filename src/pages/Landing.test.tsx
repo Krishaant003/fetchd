@@ -6,13 +6,15 @@ import { Landing } from './Landing';
 describe('Landing', () => {
   it('calls onPickMode with the chosen type', async () => {
     const onPickMode = vi.fn();
-    render(<Landing activeProfile={null} onPickMode={onPickMode} onContinue={vi.fn()} />);
+    render(<Landing activeProfile={null} onPickMode={onPickMode} onContinue={vi.fn()} onLogout={vi.fn()} />);
     await userEvent.click(screen.getByText("I'm a Dog"));
     expect(onPickMode).toHaveBeenCalledWith('dog');
   });
 
   it('shows a Continue link with the profile name only when there is an active profile', () => {
-    const { rerender } = render(<Landing activeProfile={null} onPickMode={vi.fn()} onContinue={vi.fn()} />);
+    const { rerender } = render(
+      <Landing activeProfile={null} onPickMode={vi.fn()} onContinue={vi.fn()} onLogout={vi.fn()} />
+    );
     expect(screen.queryByText(/Continue as/)).not.toBeInTheDocument();
 
     rerender(
@@ -21,6 +23,7 @@ describe('Landing', () => {
         profileName="Biscuit"
         onPickMode={vi.fn()}
         onContinue={vi.fn()}
+        onLogout={vi.fn()}
       />
     );
     expect(screen.getByText('Continue as Biscuit')).toBeInTheDocument();

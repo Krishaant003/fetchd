@@ -59,17 +59,21 @@ function AppRoutes() {
   }, []);
 
   useEffect(() => {
-    if (!activeProfile) return;
-    fetchProfile(activeProfile.type, activeProfile.id).then((profile) => {
-      setProfileName(profile.name);
-      setViewerText(combineAnswers(profile));
-    });
+    if (!activeProfile || !userId) return;
+    fetchProfile(activeProfile.type, activeProfile.id)
+      .then((profile) => {
+        setProfileName(profile.name);
+        setViewerText(combineAnswers(profile));
+      })
+      .catch(() => {});
     refreshMatchCount();
-  }, [activeProfile]);
+  }, [activeProfile, userId]);
 
   function refreshMatchCount() {
     if (!activeProfile) return;
-    fetchAcceptedMatches(activeProfile.type, activeProfile.id).then((matches) => setMatchCount(matches.length));
+    fetchAcceptedMatches(activeProfile.type, activeProfile.id)
+      .then((matches) => setMatchCount(matches.length))
+      .catch(() => {});
   }
 
   function handlePickMode(type: ProfileType) {
@@ -86,6 +90,8 @@ function AppRoutes() {
   async function handleLoggedIn() {
     const id = await getCurrentUserId();
     if (!id) return;
+    clearActiveProfile();
+    setActiveProfileState(null);
     const owned = await fetchOwnedProfiles(id);
     if (owned.length === 1) {
       setActiveProfile(owned[0]);
@@ -97,6 +103,8 @@ function AppRoutes() {
   }
 
   function handleSignedUp() {
+    clearActiveProfile();
+    setActiveProfileState(null);
     navigate('/');
   }
 
@@ -134,6 +142,7 @@ function AppRoutes() {
                 profileName={profileName}
                 onPickMode={handlePickMode}
                 onContinue={() => navigate('/discover')}
+                onLogout={handleLogout}
               />
             }
           />
