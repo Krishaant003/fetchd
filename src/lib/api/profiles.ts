@@ -6,7 +6,7 @@ export type PhotoSlot = File | string;
 export type PhotoSlots = [PhotoSlot, PhotoSlot, PhotoSlot, PhotoSlot];
 
 export interface CreateDogInput {
-  session_id: string;
+  user_id: string;
   name: string;
   breed: string;
   age: string;
@@ -15,7 +15,7 @@ export interface CreateDogInput {
 }
 
 export interface CreateAdopterInput {
-  session_id: string;
+  user_id: string;
   name: string;
   answers: Answers;
   photos: [File, File, File, File];
@@ -65,7 +65,7 @@ export async function createDogProfile(input: CreateDogInput): Promise<Dog> {
   const { data, error } = await supabase
     .from('dogs')
     .insert({
-      session_id: input.session_id,
+      user_id: input.user_id,
       name: input.name,
       breed: input.breed,
       age: input.age,
@@ -83,7 +83,7 @@ export async function createAdopterProfile(input: CreateAdopterInput): Promise<A
   const { data, error } = await supabase
     .from('adopters')
     .insert({
-      session_id: input.session_id,
+      user_id: input.user_id,
       name: input.name,
       photo_urls,
       ...answersToColumns(input.answers),
@@ -142,4 +142,30 @@ export async function fetchAdopterProfile(id: string): Promise<Adopter> {
 
 export async function fetchProfile(type: ProfileType, id: string): Promise<Dog | Adopter> {
   return type === 'dog' ? fetchDogProfile(id) : fetchAdopterProfile(id);
+}
+
+export interface OwnedProfile {
+  type: ProfileType;
+  id: string;
+}
+
+export async function fetchOwnedProfiles(userId: string): Promise<OwnedProfile[]> {
+  const [dogsResult, adoptersResult] = await Promise.all([
+    supabase.from('dogs').select('id').eq('user_id', userId),
+    supabase.from('adopters').select('id').eq('user_id', userId),
+  ]);
+
+  if (dogsResult.error) throw dogsResult.error;
+  if (adoptersResult.error) throw adoptersResult.error;
+
+  const dogProfiles: OwnedProfile[] = (dogsResult.data ?? []).map((row: { id: string }) => ({
+    type: 'dog',
+    id: row.id,
+  }));
+
+  const adopterProfiles: OwnedProfile[] = (adoptersResult.data ?? []).map((row: { id: string }) => ({
+    type: 'adopter',
+    id: row.id,
+  }));
+  return [...dogProfiles, ...adopterProfiles];
 }
