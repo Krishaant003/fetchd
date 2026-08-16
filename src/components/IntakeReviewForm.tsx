@@ -78,7 +78,10 @@ function IntakeField({ spec, fields, onChange }: { spec: IntakeFieldSpec; fields
 export function IntakeReviewForm({ fields, onChange }: IntakeReviewFormProps) {
   return (
     <div className="flex flex-col gap-3 rounded-3xl bg-surface p-6">
-      <p className="text-xs text-ink/70">Extracted from the intake document — review and correct anything before saving.</p>
+      <p className="mb-1 text-xs leading-relaxed text-ink/70">
+        Review extracted intake data before saving. This data is never displayed publicly it's used solely to power
+        compatibility matching between dogs and adopters
+      </p>
       {INTAKE_FIELD_SPECS.map((spec) => (
         <IntakeField key={spec.key} spec={spec} fields={fields} onChange={onChange} />
       ))}

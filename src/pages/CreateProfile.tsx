@@ -223,7 +223,13 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
           {isDog && (
             <div>
               <label className="mb-1.5 block text-xs text-ink/70">Intake/vet sheet (optional)</label>
-              <input aria-label="intake document" type="file" accept="image/*" onChange={handleIntakeDocumentChange} className="w-full text-xs" />
+              <input
+                aria-label="intake document"
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleIntakeDocumentChange}
+                className="w-full cursor-pointer text-xs text-ink/70 file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:bg-clay file:px-4 file:py-2 file:font-heading file:text-xs file:text-cream hover:file:bg-clay-600"
+              />
               {extracting && <p className="mt-1 text-xs text-ink/60">Reading document…</p>}
               {extractError && <p className="mt-1 text-xs text-clay-700">{extractError}</p>}
             </div>

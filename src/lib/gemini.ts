@@ -60,7 +60,7 @@ export async function generateCompatibilityNote(viewerText: string, targetText: 
 
 export async function extractIntakeDocument(imageBase64: string, mimeType: string): Promise<IntakeExtraction> {
   const prompt = [
-    'You extract structured data from a photographed animal shelter intake or veterinary document.',
+    'You extract structured data from an animal shelter intake or veterinary document (a photo or a scanned/digital PDF).',
     'Return ONLY a JSON object matching this exact shape - no preamble, no commentary, no markdown formatting:',
     '',
     JSON.stringify(
