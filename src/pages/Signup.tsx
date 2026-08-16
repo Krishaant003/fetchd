@@ -1,4 +1,5 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { signUp } from '../lib/auth';
 import { Logo } from '../components/Logo';
@@ -58,11 +59,11 @@ export function Signup({ onSignedUp }: SignupProps) {
           disabled={submitting}
           className="rounded-full bg-clay px-7 py-3 font-heading text-[15px] text-cream transition-colors hover:bg-clay-600 disabled:opacity-60"
         >
-          Sign up
+          {submitting ? 'Signing up…' : 'Sign up'}
         </button>
       </form>
-      <Link to="/login" className="mt-6 text-sm text-clay-700 underline-offset-4">
-        Have an account? Log in
+      <Link to="/login" className="mt-6 text-sm text-clay-700 underline underline-offset-4">
+        Already have an account? Log in
       </Link>
     </div>
   );
