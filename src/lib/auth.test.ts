@@ -45,12 +45,12 @@ describe('signUp', () => {
 
   it('throws a friendly error when Supabase reports the email is already registered', async () => {
     authMocks.signUp.mockResolvedValue({ data: { user: null }, error: { message: 'User already registered' } });
-    await expect(signUp('jane', 'pw12345')).rejects.toThrow('That username is taken — try another.');
+    await expect(signUp('jane', 'pw12345')).rejects.toThrow('That username taken — try another.');
   });
 
   it('throws a friendly error when signup succeeds but returns no identities (silent duplicate)', async () => {
     authMocks.signUp.mockResolvedValue({ data: { user: { identities: [] } }, error: null });
-    await expect(signUp('jane', 'pw12345')).rejects.toThrow('That username is taken — try another.');
+    await expect(signUp('jane', 'pw12345')).rejects.toThrow('That username taken — try another.');
   });
 });
 

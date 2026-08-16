@@ -1,7 +1,7 @@
 import { supabase } from '../supabaseClient';
 
 const EMAIL_DOMAIN = '@fetchd.local';
-const TAKEN_ERROR = 'That username is taken — try another.';
+const TAKEN_ERROR = 'That username taken — try another.';
 const LOGIN_ERROR = 'Incorrect username or password.';
 
 export function normalizeUsername(raw: string): string {
