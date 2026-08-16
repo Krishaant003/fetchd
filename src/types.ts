@@ -31,6 +31,7 @@ export interface Dog {
 export interface QuestionSpec {
   label: string;
   placeholder: string;
+  input?: 'text';
 }
 
 export const DOG_QUESTIONS: QuestionSpec[] = [
@@ -42,11 +43,27 @@ export const DOG_QUESTIONS: QuestionSpec[] = [
 ];
 
 export const ADOPTER_QUESTIONS: QuestionSpec[] = [
-  { label: 'Lifestyle', placeholder: 'Active, homebody, somewhere in between?' },
-  { label: 'Typical day', placeholder: 'Walk them through a normal day.' },
-  { label: 'Other pets or kids at home', placeholder: 'Who else is in the house?' },
-  { label: 'Dog experience', placeholder: 'First dog, or done this before?' },
-  { label: 'What are you hoping for', placeholder: 'What kind of dog would suit your life?' },
+  {
+    label: 'Home & nearby space',
+    placeholder: 'Living situation (apartment / house with yard / house without yard) and nearest place to walk or play (park nearby / trail nearby / none nearby)',
+  },
+  {
+    label: 'Household',
+    placeholder: 'Other pets at home (none / dogs / cats / other) and kids at home (none / yes — approx. ages)',
+  },
+  {
+    label: 'Hours alone on a typical day',
+    placeholder: 'e.g. 4 or 4-6',
+    input: 'text',
+  },
+  {
+    label: 'Any noise-sensitive situations at home?',
+    placeholder: 'e.g. near train tracks, busy street, loud household',
+  },
+  {
+    label: 'Previous dog experience?',
+    placeholder: 'First-time / some experience / experienced',
+  },
 ];
 
 export function combineAnswers(profile: Dog | Adopter): string {

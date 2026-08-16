@@ -208,18 +208,31 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
         </div>
 
         <div className="flex flex-col gap-5 rounded-3xl bg-surface p-6">
-          {questions.map((question, i) => (
-            <div key={i}>
-              <label className="mb-1.5 block text-xs text-ink/70">{question.label}</label>
-              <textarea
-                aria-label={`answer ${i + 1}`}
-                value={answers[i]}
-                onChange={(e) => handleAnswerChange(i, e.target.value)}
-                placeholder={question.placeholder}
-                className={`min-h-17.5 w-full resize-y rounded-2xl border border-divider bg-surface-2 px-3.5 py-2.5 text-sm outline-none ${focusBorderClass}`}
-              />
-            </div>
-          ))}
+          {questions.map((question, i) =>
+            question.input === 'text' ? (
+              <div key={i}>
+                <label className="mb-1.5 block text-xs text-ink/70">{question.label}</label>
+                <input
+                  aria-label={`answer ${i + 1}`}
+                  value={answers[i]}
+                  onChange={(e) => handleAnswerChange(i, e.target.value)}
+                  placeholder={question.placeholder}
+                  className={`min-h-10 w-full rounded-full border border-divider bg-surface-2 px-3.5 py-2 text-sm outline-none ${focusBorderClass}`}
+                />
+              </div>
+            ) : (
+              <div key={i}>
+                <label className="mb-1.5 block text-xs text-ink/70">{question.label}</label>
+                <textarea
+                  aria-label={`answer ${i + 1}`}
+                  value={answers[i]}
+                  onChange={(e) => handleAnswerChange(i, e.target.value)}
+                  placeholder={question.placeholder}
+                  className={`min-h-17.5 w-full resize-y rounded-2xl border border-divider bg-surface-2 px-3.5 py-2.5 text-sm outline-none ${focusBorderClass}`}
+                />
+              </div>
+            )
+          )}
           {answerError && <p className="text-xs text-clay-700">{answerError}</p>}
           <button
             type="submit"
