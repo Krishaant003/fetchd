@@ -25,6 +25,23 @@ create table dogs (
   answer_3 text not null,
   answer_4 text not null,
   answer_5 text not null,
+  sex text,
+  color text,
+  intake_date date,
+  intake_source text,
+  weight text,
+  temperature text,
+  body_condition_score text,
+  exam_notes text,
+  vaccine_records jsonb,
+  deworming_flea_treatment text,
+  microchip_number text,
+  spay_neuter_status text,
+  spay_neuter_date date,
+  current_medications text,
+  diagnosed_conditions text[],
+  dietary_needs_allergies text,
+  behavior_observations text,
   created_at timestamptz not null default now()
 );
 

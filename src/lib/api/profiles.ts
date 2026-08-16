@@ -1,5 +1,5 @@
 import { supabase } from '../../supabaseClient';
-import type { Adopter, Dog, ProfileType } from '../../types';
+import type { Adopter, Dog, IntakeFields, ProfileType } from '../../types';
 
 export type Answers = [string, string, string, string, string];
 export type PhotoSlot = File | string;
@@ -12,6 +12,7 @@ export interface CreateDogInput {
   age: string;
   answers: Answers;
   photos: [File, File, File, File];
+  intake?: IntakeFields;
 }
 
 export interface CreateAdopterInput {
@@ -28,6 +29,7 @@ export interface UpdateDogInput {
   age: string;
   answers: Answers;
   photos: PhotoSlots;
+  intake?: IntakeFields;
 }
 
 export interface UpdateAdopterInput {
@@ -60,6 +62,10 @@ function answersToColumns(answers: Answers) {
   return { answer_1, answer_2, answer_3, answer_4, answer_5 };
 }
 
+function intakeToColumns(intake?: IntakeFields) {
+  return intake ?? {};
+}
+
 export async function createDogProfile(input: CreateDogInput): Promise<Dog> {
   const photo_urls = await uploadPhotos(input.photos);
   const { data, error } = await supabase
@@ -71,6 +77,7 @@ export async function createDogProfile(input: CreateDogInput): Promise<Dog> {
       age: input.age,
       photo_urls,
       ...answersToColumns(input.answers),
+      ...intakeToColumns(input.intake),
     })
     .select()
     .single();
@@ -104,6 +111,7 @@ export async function updateDogProfile(input: UpdateDogInput): Promise<Dog> {
       age: input.age,
       photo_urls,
       ...answersToColumns(input.answers),
+      ...intakeToColumns(input.intake),
     })
     .eq('id', input.id)
     .select()

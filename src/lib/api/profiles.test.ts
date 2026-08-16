@@ -35,6 +35,8 @@ vi.mock('../../supabaseClient', () => {
 
 import { supabase } from '../../supabaseClient';
 import { createDogProfile, fetchOwnedProfiles } from './profiles';
+import { emptyIntakeFields } from '../../types';
+import type { IntakeFields } from '../../types';
 
 describe('createDogProfile', () => {
   it('uploads all 4 photos and inserts a dog row with 5 answers', async () => {
@@ -81,5 +83,47 @@ describe('fetchOwnedProfiles', () => {
     ]);
     expect(dogsEq).toHaveBeenCalledWith('user_id', 'u1');
     expect(adoptersEq).toHaveBeenCalledWith('user_id', 'u1');
+  });
+});
+
+describe('createDogProfile with intake data', () => {
+  it('includes intake fields on the inserted row when provided', async () => {
+    const insert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ data: { id: 'dog-2' }, error: null }),
+      }),
+    });
+    (supabase.from as any) = vi.fn().mockReturnValue({ insert });
+    (supabase.storage.from as any) = vi.fn().mockReturnValue({
+      upload: vi.fn().mockResolvedValue({ error: null }),
+      getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: 'https://example.com/p.jpg' } }),
+    });
+
+    const photos = [
+      new File(['1'], 'a.jpg', { type: 'image/jpeg' }),
+      new File(['2'], 'b.jpg', { type: 'image/jpeg' }),
+      new File(['3'], 'c.jpg', { type: 'image/jpeg' }),
+      new File(['4'], 'd.jpg', { type: 'image/jpeg' }),
+    ] as [File, File, File, File];
+
+    const intake: IntakeFields = {
+      ...emptyIntakeFields(),
+      weight: '45 lbs',
+      behavior_observations: 'anxious around loud noises',
+    };
+
+    await createDogProfile({
+      user_id: 's1',
+      name: 'Rex',
+      breed: 'Mutt',
+      age: '2',
+      answers: ['a1', 'a2', 'a3', 'a4', 'a5'],
+      photos,
+      intake,
+    });
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({ weight: '45 lbs', behavior_observations: 'anxious around loud noises' })
+    );
   });
 });

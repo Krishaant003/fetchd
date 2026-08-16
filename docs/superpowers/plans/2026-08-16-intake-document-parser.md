@@ -210,25 +210,40 @@ Expected: FAIL — `emptyIntakeFields` is not exported / `combineAnswers` doesn'
 
 In `src/types.ts`, after the `ProfileType` export at line 1, add:
 
+All 17 fields are declared **optional** (`?:`), not just nullable. This
+is deliberate: `Dog` will extend `IntakeFields` below, and several
+existing test fixtures (`DogCard.test.tsx`, `Liked.test.tsx`,
+`SwipeDeck.test.tsx`, `profiles.test.ts`) construct dog-shaped object
+literals that predate this feature and don't set these fields. Making
+them required would break those files' compilation — out of scope for
+this plan to touch. Optional keeps `Dog` backward-compatible with those
+literals. Real un-set Postgres columns come back from Supabase as
+`null` (never `undefined`), including `diagnosed_conditions`/
+`vaccine_records` on rows that predate the Task 1 migration (`alter
+table add column` backfills existing rows with `null`, not `[]`) — so
+every read site below treats `null` and `undefined` as the same "no
+data" case (loose `!= null` checks, `?? []` defaults), never a strict
+`!== null` or an unguarded `.join()`.
+
 ```typescript
 export interface IntakeFields {
-  sex: string | null;
-  color: string | null;
-  intake_date: string | null;
-  intake_source: string | null;
-  weight: string | null;
-  temperature: string | null;
-  body_condition_score: string | null;
-  exam_notes: string | null;
-  vaccine_records: string[];
-  deworming_flea_treatment: string | null;
-  microchip_number: string | null;
-  spay_neuter_status: string | null;
-  spay_neuter_date: string | null;
-  current_medications: string | null;
-  diagnosed_conditions: string[];
-  dietary_needs_allergies: string | null;
-  behavior_observations: string | null;
+  sex?: string | null;
+  color?: string | null;
+  intake_date?: string | null;
+  intake_source?: string | null;
+  weight?: string | null;
+  temperature?: string | null;
+  body_condition_score?: string | null;
+  exam_notes?: string | null;
+  vaccine_records?: string[] | null;
+  deworming_flea_treatment?: string | null;
+  microchip_number?: string | null;
+  spay_neuter_status?: string | null;
+  spay_neuter_date?: string | null;
+  current_medications?: string | null;
+  diagnosed_conditions?: string[] | null;
+  dietary_needs_allergies?: string | null;
+  behavior_observations?: string | null;
 }
 
 export interface IntakeExtraction extends IntakeFields {
@@ -306,18 +321,19 @@ Replace the existing `combineAnswers` function with:
 
 ```typescript
 function intakeNoteFor(dog: Dog): string | null {
+  const diagnosedConditions = dog.diagnosed_conditions ?? [];
   const hasIntakeData =
-    dog.weight !== null ||
-    dog.spay_neuter_status !== null ||
-    dog.diagnosed_conditions.length > 0 ||
-    dog.dietary_needs_allergies !== null ||
-    dog.behavior_observations !== null;
+    dog.weight != null ||
+    dog.spay_neuter_status != null ||
+    diagnosedConditions.length > 0 ||
+    dog.dietary_needs_allergies != null ||
+    dog.behavior_observations != null;
   if (!hasIntakeData) return null;
 
   const parts = [`${dog.breed}, age ${dog.age}.`];
   if (dog.weight) parts.push(`Weight: ${dog.weight}.`);
   if (dog.spay_neuter_status) parts.push(`Spay/neuter status: ${dog.spay_neuter_status}.`);
-  if (dog.diagnosed_conditions.length > 0) parts.push(`Diagnosed conditions: ${dog.diagnosed_conditions.join(', ')}.`);
+  if (diagnosedConditions.length > 0) parts.push(`Diagnosed conditions: ${diagnosedConditions.join(', ')}.`);
   if (dog.dietary_needs_allergies) parts.push(`Dietary needs: ${dog.dietary_needs_allergies}.`);
   if (dog.behavior_observations) parts.push(`Vet-observed behavior: ${dog.behavior_observations}.`);
   return `Vet intake notes — ${parts.join(' ')}`;
@@ -746,8 +762,8 @@ interface IntakeReviewFormProps {
 }
 
 function fieldValue(fields: IntakeFields, spec: IntakeFieldSpec): string {
-  if (spec.isList) return (fields[spec.key] as string[]).join(', ');
-  return (fields[spec.key] as string | null) ?? '';
+  if (spec.isList) return ((fields[spec.key] as string[] | null | undefined) ?? []).join(', ');
+  return (fields[spec.key] as string | null | undefined) ?? '';
 }
 
 function withFieldValue(fields: IntakeFields, spec: IntakeFieldSpec, raw: string): IntakeFields {
