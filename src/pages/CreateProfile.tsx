@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import type { Adopter, Dog, ProfileType } from '../types';
-import { ADOPTER_QUESTIONS, DOG_QUESTIONS, combineAnswers } from '../types';
+import type { Adopter, Dog, IntakeFields, ProfileType } from '../types';
+import { ADOPTER_QUESTIONS, DOG_QUESTIONS, combineAnswers, emptyIntakeFields, pickIntakeFields } from '../types';
 import {
   createAdopterProfile,
   createDogProfile,
@@ -10,6 +10,8 @@ import {
 } from '../lib/api/profiles';
 import type { Answers, PhotoSlots } from '../lib/api/profiles';
 import type { ActiveProfile } from '../lib/session';
+import { extractIntakeDocument } from '../lib/gemini';
+import { IntakeReviewForm } from '../components/IntakeReviewForm';
 
 type FormPhotoSlot = File | string | null;
 
@@ -36,6 +38,20 @@ function emptyPhotos(existingProfile?: Dog | Adopter): [FormPhotoSlot, FormPhoto
   return [...existingProfile.photo_urls];
 }
 
+function initialIntakeFields(existingProfile?: Dog | Adopter): IntakeFields {
+  if (existingProfile && 'breed' in existingProfile) return pickIntakeFields(existingProfile);
+  return emptyIntakeFields();
+}
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(',')[1]);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 export function CreateProfile({ userId, profileType, existingProfile, onCreated }: CreateProfileProps) {
   const isEditing = !!existingProfile;
   const isDog = profileType === 'dog';
@@ -59,6 +75,10 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
   const [missingPhotoIndexes, setMissingPhotoIndexes] = useState<number[]>([]);
   const [answerError, setAnswerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [intakeFields, setIntakeFields] = useState<IntakeFields>(initialIntakeFields(existingProfile));
+  const [intakeVersion, setIntakeVersion] = useState(0);
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
 
   function handlePhotoChange(index: number, e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -84,6 +104,26 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
     });
   }
 
+  async function handleIntakeDocumentChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setExtracting(true);
+    setExtractError(null);
+    try {
+      const base64 = await fileToBase64(file);
+      const extraction = await extractIntakeDocument(base64, file.type);
+      setIntakeFields(pickIntakeFields(extraction));
+      setIntakeVersion((v) => v + 1);
+      if (extraction.name) setName(extraction.name);
+      if (extraction.breed) setBreed(extraction.breed);
+      if (extraction.age) setAge(extraction.age);
+    } catch {
+      setExtractError('Could not read that document. You can still fill in fields manually below.');
+    } finally {
+      setExtracting(false);
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
@@ -105,7 +145,7 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
 
     if (profileType === 'dog') {
       const dog = isEditing
-        ? await updateDogProfile({ id: existingProfile!.id, name, breed, age, answers, photos: resolvedPhotos })
+        ? await updateDogProfile({ id: existingProfile!.id, name, breed, age, answers, photos: resolvedPhotos, intake: intakeFields })
         : await createDogProfile({
             user_id: userId,
             name,
@@ -113,6 +153,7 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
             age,
             answers,
             photos: resolvedPhotos as [File, File, File, File],
+            intake: intakeFields,
           });
       onCreated({ type: 'dog', id: dog.id }, combineAnswers(dog));
     } else {
@@ -179,6 +220,15 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
             </div>
           )}
 
+          {isDog && (
+            <div>
+              <label className="mb-1.5 block text-xs text-ink/70">Intake/vet sheet (optional)</label>
+              <input aria-label="intake document" type="file" accept="image/*" onChange={handleIntakeDocumentChange} className="w-full text-xs" />
+              {extracting && <p className="mt-1 text-xs text-ink/60">Reading document…</p>}
+              {extractError && <p className="mt-1 text-xs text-clay-700">{extractError}</p>}
+            </div>
+          )}
+
           <div>
             <label className="mb-2 block text-xs text-ink/70">4 photos required</label>
             <div className="grid grid-cols-2 gap-2.5">
@@ -220,6 +270,7 @@ export function CreateProfile({ userId, profileType, existingProfile, onCreated 
               />
             </div>
           ))}
+          {isDog && <IntakeReviewForm key={intakeVersion} fields={intakeFields} onChange={setIntakeFields} />}
           {answerError && <p className="text-xs text-clay-700">{answerError}</p>}
           <button
             type="submit"
