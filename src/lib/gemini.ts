@@ -1,3 +1,5 @@
+import type { IntakeExtraction } from '../types';
+
 const GEMINI_MODEL = 'gemini-flash-latest';
 
 function endpoint(): string {
@@ -54,4 +56,68 @@ export async function generateCompatibilityNote(viewerText: string, targetText: 
     throw new Error('Gemini response missing text');
   }
   return text.trim();
+}
+
+export async function extractIntakeDocument(imageBase64: string, mimeType: string): Promise<IntakeExtraction> {
+  const prompt = [
+    'You extract structured data from a photographed animal shelter intake or veterinary document.',
+    'Return ONLY a JSON object matching this exact shape - no preamble, no commentary, no markdown formatting:',
+    '',
+    JSON.stringify(
+      {
+        dog_id: null,
+        name: null,
+        breed: null,
+        age: null,
+        sex: null,
+        color: null,
+        intake_date: null,
+        intake_source: null,
+        weight: null,
+        temperature: null,
+        body_condition_score: null,
+        exam_notes: null,
+        vaccine_records: [],
+        deworming_flea_treatment: null,
+        microchip_number: null,
+        spay_neuter_status: null,
+        spay_neuter_date: null,
+        current_medications: null,
+        diagnosed_conditions: [],
+        dietary_needs_allergies: null,
+        behavior_observations: null,
+      },
+      null,
+      2
+    ),
+    '',
+    'Rules:',
+    '- Use null (or an empty array for vaccine_records / diagnosed_conditions) for any field not actually written on the document.',
+    '- Never guess or infer a value that is not literally present on the page.',
+    '- vaccine_records and diagnosed_conditions are arrays of short strings, one entry per item found.',
+  ].join('\n');
+
+  const res = await fetch(endpoint(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: imageBase64 } }],
+        },
+      ],
+      generationConfig: { responseMimeType: 'application/json' },
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Gemini request failed: ${res.status}`);
+  }
+
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    throw new Error('Gemini response missing text');
+  }
+  return JSON.parse(text) as IntakeExtraction;
 }
