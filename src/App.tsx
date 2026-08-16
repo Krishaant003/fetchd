@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import type { ProfileType } from './types';
 import { combineAnswers } from './types';
-import { getOrCreateSessionId, getActiveProfile, setActiveProfile } from './lib/session';
+import { getActiveProfile, setActiveProfile, clearActiveProfile } from './lib/session';
 import type { ActiveProfile } from './lib/session';
-import { fetchProfile } from './lib/api/profiles';
+import { getCurrentUserId, onAuthStateChange, logOut } from './lib/auth';
+import { fetchProfile, fetchOwnedProfiles } from './lib/api/profiles';
 import { fetchAcceptedMatches } from './lib/api/matches';
+import { Signup } from './pages/Signup';
+import { Login } from './pages/Login';
 import { Landing } from './pages/Landing';
 import { CreateProfile } from './pages/CreateProfile';
 import { SwipeDeck } from './pages/SwipeDeck';
@@ -22,19 +25,25 @@ interface PendingMatch {
 }
 
 interface JoinRouteProps {
-  sessionId: string;
+  userId: string;
   onCreated: (profile: ActiveProfile, viewerText: string) => void;
 }
 
-function JoinRoute({ sessionId, onCreated }: JoinRouteProps) {
+function JoinRoute({ userId, onCreated }: JoinRouteProps) {
   const { type } = useParams();
   if (type !== 'dog' && type !== 'adopter') return <Navigate to="/" replace />;
-  return <CreateProfile sessionId={sessionId} profileType={type} onCreated={onCreated} />;
+  return <CreateProfile userId={userId} profileType={type} onCreated={onCreated} />;
+}
+
+function RequireAuth({ userId }: { userId: string | null }) {
+  if (!userId) return <Navigate to="/login" replace />;
+  return <Outlet />;
 }
 
 function AppRoutes() {
   const navigate = useNavigate();
-  const [sessionId] = useState(getOrCreateSessionId);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [activeProfile, setActiveProfileState] = useState<ActiveProfile | null>(getActiveProfile);
   const [profileName, setProfileName] = useState('');
   const [viewerText, setViewerText] = useState('');
@@ -42,17 +51,29 @@ function AppRoutes() {
   const [matchCount, setMatchCount] = useState(0);
 
   useEffect(() => {
-    if (!activeProfile) return;
-    fetchProfile(activeProfile.type, activeProfile.id).then((profile) => {
-      setProfileName(profile.name);
-      setViewerText(combineAnswers(profile));
+    getCurrentUserId().then((id) => {
+      setUserId(id);
+      setAuthLoading(false);
     });
+    return onAuthStateChange((id) => setUserId(id));
+  }, []);
+
+  useEffect(() => {
+    if (!activeProfile || !userId) return;
+    fetchProfile(activeProfile.type, activeProfile.id)
+      .then((profile) => {
+        setProfileName(profile.name);
+        setViewerText(combineAnswers(profile));
+      })
+      .catch(() => {});
     refreshMatchCount();
-  }, [activeProfile]);
+  }, [activeProfile, userId]);
 
   function refreshMatchCount() {
     if (!activeProfile) return;
-    fetchAcceptedMatches(activeProfile.type, activeProfile.id).then((matches) => setMatchCount(matches.length));
+    fetchAcceptedMatches(activeProfile.type, activeProfile.id)
+      .then((matches) => setMatchCount(matches.length))
+      .catch(() => {});
   }
 
   function handlePickMode(type: ProfileType) {
@@ -66,6 +87,34 @@ function AppRoutes() {
     navigate('/discover');
   }
 
+  async function handleLoggedIn() {
+    const id = await getCurrentUserId();
+    if (!id) return;
+    clearActiveProfile();
+    setActiveProfileState(null);
+    const owned = await fetchOwnedProfiles(id);
+    if (owned.length === 1) {
+      setActiveProfile(owned[0]);
+      setActiveProfileState(owned[0]);
+      navigate('/discover');
+    } else {
+      navigate('/');
+    }
+  }
+
+  function handleSignedUp() {
+    clearActiveProfile();
+    setActiveProfileState(null);
+    navigate('/');
+  }
+
+  async function handleLogout() {
+    await logOut();
+    clearActiveProfile();
+    setActiveProfileState(null);
+    navigate('/login');
+  }
+
   function handleMatchResolved() {
     setPendingMatch(null);
     refreshMatchCount();
@@ -76,59 +125,76 @@ function AppRoutes() {
     refreshMatchCount();
   }
 
+  if (authLoading) return null;
+
   return (
     <>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Landing
-              activeProfile={activeProfile}
-              profileName={profileName}
-              onPickMode={handlePickMode}
-              onContinue={() => navigate('/discover')}
-            />
-          }
-        />
-        <Route path="/join/:type" element={<JoinRoute sessionId={sessionId} onCreated={handleCreated} />} />
+        <Route path="/signup" element={userId ? <Navigate to="/" replace /> : <Signup onSignedUp={handleSignedUp} />} />
+        <Route path="/login" element={userId ? <Navigate to="/" replace /> : <Login onLoggedIn={handleLoggedIn} />} />
 
-        <Route element={<AppShell activeProfile={activeProfile} profileName={profileName} matchCount={matchCount} />}>
+        <Route element={<RequireAuth userId={userId} />}>
           <Route
-            path="/discover"
+            path="/"
             element={
-              activeProfile && (
-                <SwipeDeck
-                  activeProfile={activeProfile}
-                  viewerText={viewerText}
-                  onMatch={(id, otherName) => setPendingMatch({ id, otherName })}
-                />
-              )
+              <Landing
+                activeProfile={activeProfile}
+                profileName={profileName}
+                onPickMode={handlePickMode}
+                onContinue={() => navigate('/discover')}
+                onLogout={handleLogout}
+              />
             }
           />
+          <Route path="/join/:type" element={userId && <JoinRoute userId={userId} onCreated={handleCreated} />} />
+
           <Route
-            path="/matches"
             element={
-              activeProfile && (
-                <MatchedSection
-                  activeProfile={activeProfile}
-                  onOpenMatch={(match) => navigate(`/matches/${match.match.id}`)}
-                />
-              )
+              <AppShell
+                activeProfile={activeProfile}
+                profileName={profileName}
+                matchCount={matchCount}
+                onLogout={handleLogout}
+              />
             }
-          />
-          <Route
-            path="/matches/:matchId"
-            element={activeProfile && <ChatRoute activeProfile={activeProfile} onMatchClosed={handleMatchClosed} />}
-          />
-          <Route path="/liked" element={activeProfile && <Liked activeProfile={activeProfile} />} />
-          <Route
-            path="/profile/edit"
-            element={
-              activeProfile && (
-                <EditProfileRoute sessionId={sessionId} activeProfile={activeProfile} onCreated={handleCreated} />
-              )
-            }
-          />
+          >
+            <Route
+              path="/discover"
+              element={
+                activeProfile && (
+                  <SwipeDeck
+                    activeProfile={activeProfile}
+                    viewerText={viewerText}
+                    onMatch={(id, otherName) => setPendingMatch({ id, otherName })}
+                  />
+                )
+              }
+            />
+            <Route
+              path="/matches"
+              element={
+                activeProfile && (
+                  <MatchedSection
+                    activeProfile={activeProfile}
+                    onOpenMatch={(match) => navigate(`/matches/${match.match.id}`)}
+                  />
+                )
+              }
+            />
+            <Route
+              path="/matches/:matchId"
+              element={activeProfile && <ChatRoute activeProfile={activeProfile} onMatchClosed={handleMatchClosed} />}
+            />
+            <Route path="/liked" element={activeProfile && <Liked activeProfile={activeProfile} />} />
+            <Route
+              path="/profile/edit"
+              element={
+                activeProfile && userId && (
+                  <EditProfileRoute userId={userId} activeProfile={activeProfile} onCreated={handleCreated} />
+                )
+              }
+            />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

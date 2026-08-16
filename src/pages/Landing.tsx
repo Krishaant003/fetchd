@@ -7,6 +7,7 @@ interface LandingProps {
   profileName?: string;
   onPickMode: (type: ProfileType) => void;
   onContinue: () => void;
+  onLogout: () => void;
 }
 
 export function Landing({
@@ -14,6 +15,7 @@ export function Landing({
   profileName,
   onPickMode,
   onContinue,
+  onLogout,
 }: LandingProps) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-10 text-center sm:px-10">
@@ -60,6 +62,13 @@ export function Landing({
           Continue as {profileName}
         </button>
       )}
+
+      <button
+        onClick={onLogout}
+        className="mt-7 text-sm text-clay-700 underline underline-offset-4"
+      >
+        Sign out
+      </button>
     </div>
   );
 }

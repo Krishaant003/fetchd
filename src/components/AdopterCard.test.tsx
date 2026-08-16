@@ -5,7 +5,7 @@ import { AdopterCard } from './AdopterCard';
 
 const adopter = {
   id: 'a1',
-  session_id: 's1',
+  user_id: 's1',
   name: 'Jo',
   photo_urls: [
     'https://example.com/jo1.jpg',

@@ -2,7 +2,7 @@ export type ProfileType = 'adopter' | 'dog';
 
 export interface Adopter {
   id: string;
-  session_id: string;
+  user_id: string;
   name: string;
   photo_urls: [string, string, string, string];
   answer_1: string;
@@ -15,7 +15,7 @@ export interface Adopter {
 
 export interface Dog {
   id: string;
-  session_id: string;
+  user_id: string;
   name: string;
   breed: string;
   age: string;

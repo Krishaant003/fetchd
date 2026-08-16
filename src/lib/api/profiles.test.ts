@@ -10,7 +10,7 @@ vi.mock('../../supabaseClient', () => {
   const single = vi.fn().mockResolvedValue({
     data: {
       id: 'dog-1',
-      session_id: 's1',
+      user_id: 's1',
       name: 'Rex',
       breed: 'Mutt',
       age: '2',
@@ -33,7 +33,8 @@ vi.mock('../../supabaseClient', () => {
   };
 });
 
-import { createDogProfile } from './profiles';
+import { supabase } from '../../supabaseClient';
+import { createDogProfile, fetchOwnedProfiles } from './profiles';
 
 describe('createDogProfile', () => {
   it('uploads all 4 photos and inserts a dog row with 5 answers', async () => {
@@ -45,7 +46,7 @@ describe('createDogProfile', () => {
     ] as [File, File, File, File];
 
     const dog = await createDogProfile({
-      session_id: 's1',
+      user_id: 's1',
       name: 'Rex',
       breed: 'Mutt',
       age: '2',
@@ -56,5 +57,29 @@ describe('createDogProfile', () => {
     expect(dog.name).toBe('Rex');
     expect(dog.photo_urls).toHaveLength(4);
     expect(dog.answer_1).toBe('a1');
+  });
+});
+
+describe('fetchOwnedProfiles', () => {
+  it('returns dog and adopter profiles owned by the user', async () => {
+    const dogsEq = vi.fn().mockResolvedValue({ data: [{ id: 'd1' }], error: null });
+    const dogsSelect = vi.fn().mockReturnValue({ eq: dogsEq });
+    const adoptersEq = vi.fn().mockResolvedValue({ data: [{ id: 'a1' }], error: null });
+    const adoptersSelect = vi.fn().mockReturnValue({ eq: adoptersEq });
+
+    (supabase.from as any) = vi.fn((table: string) => {
+      if (table === 'dogs') return { select: dogsSelect };
+      if (table === 'adopters') return { select: adoptersSelect };
+      throw new Error(`unexpected table ${table}`);
+    });
+
+    const owned = await fetchOwnedProfiles('u1');
+
+    expect(owned).toEqual([
+      { type: 'dog', id: 'd1' },
+      { type: 'adopter', id: 'a1' },
+    ]);
+    expect(dogsEq).toHaveBeenCalledWith('user_id', 'u1');
+    expect(adoptersEq).toHaveBeenCalledWith('user_id', 'u1');
   });
 });

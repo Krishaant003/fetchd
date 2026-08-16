@@ -36,7 +36,7 @@ async function uploadAllPhotos() {
 
 describe('CreateProfile', () => {
   it('blocks submission and shows an error when a photo is missing', async () => {
-    render(<CreateProfile sessionId="s1" profileType="dog" onCreated={vi.fn()} />);
+    render(<CreateProfile userId="s1" profileType="dog" onCreated={vi.fn()} />);
 
     await fillRequiredTextFields();
     // Only upload 3 of the 4 required photos.
@@ -52,7 +52,7 @@ describe('CreateProfile', () => {
 
   it('submits a dog profile with all 4 photos and 5 answers, and calls onCreated', async () => {
     const onCreated = vi.fn();
-    render(<CreateProfile sessionId="s1" profileType="dog" onCreated={onCreated} />);
+    render(<CreateProfile userId="s1" profileType="dog" onCreated={onCreated} />);
 
     await fillRequiredTextFields();
     await uploadAllPhotos();
