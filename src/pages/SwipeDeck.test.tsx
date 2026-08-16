@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 const { dog } = vi.hoisted(() => ({
   dog: {
     id: 'd1',
-    session_id: 's1',
+    user_id: 's1',
     name: 'Rex',
     breed: 'Mutt',
     age: '2',
