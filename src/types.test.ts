@@ -41,8 +41,10 @@ describe('combineAnswers', () => {
     expect(combineAnswers(makeDog())).toBe('a1 a2 a3 a4 a5');
   });
 
-  it('joins the 5 answers unchanged for an adopter', () => {
-    expect(combineAnswers(makeAdopter())).toBe('x1 x2 x3 x4 x5');
+  it('formats an adopter as labeled fields', () => {
+    expect(combineAnswers(makeAdopter())).toBe(
+      'Home & nearby space: x1. Household: x2. Hours alone on a typical day: x3. Noise-sensitive situations: x4. Previous dog experience: x5.'
+    );
   });
 
   it('appends a vet intake summary when a dog has compatibility-relevant intake data', () => {

@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 vi.mock('../lib/api/profiles', () => ({
   createDogProfile: vi.fn().mockResolvedValue({
     id: 'd1',
+    breed: 'Mutt',
     answer_1: 'a1',
     answer_2: 'a2',
     answer_3: 'a3',

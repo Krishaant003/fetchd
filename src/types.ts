@@ -166,9 +166,19 @@ function intakeNoteFor(dog: Dog): string | null {
   return `Vet intake notes — ${parts.join(' ')}`;
 }
 
+function adopterNoteFor(adopter: Adopter): string {
+  const parts: string[] = [];
+  if (adopter.answer_1) parts.push(`Home & nearby space: ${adopter.answer_1}.`);
+  if (adopter.answer_2) parts.push(`Household: ${adopter.answer_2}.`);
+  if (adopter.answer_3) parts.push(`Hours alone on a typical day: ${adopter.answer_3}.`);
+  if (adopter.answer_4) parts.push(`Noise-sensitive situations: ${adopter.answer_4}.`);
+  if (adopter.answer_5) parts.push(`Previous dog experience: ${adopter.answer_5}.`);
+  return parts.join(' ');
+}
+
 export function combineAnswers(profile: Dog | Adopter): string {
+  if (!('breed' in profile)) return adopterNoteFor(profile);
   const base = [profile.answer_1, profile.answer_2, profile.answer_3, profile.answer_4, profile.answer_5].join(' ');
-  if (!('breed' in profile)) return base;
   const note = intakeNoteFor(profile);
   return note ? `${base} ${note}` : base;
 }
