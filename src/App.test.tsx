@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+vi.mock('./lib/auth', () => ({
+  getCurrentUserId: vi.fn(),
+  onAuthStateChange: vi.fn(() => () => {}),
+  logOut: vi.fn(),
+}));
 vi.mock('./lib/api/profiles', () => ({
   createDogProfile: vi.fn(),
   createAdopterProfile: vi.fn(),
@@ -25,6 +30,7 @@ vi.mock('./lib/api/messages', () => ({
 }));
 
 import App from './App';
+import { getCurrentUserId } from './lib/auth';
 
 describe('App', () => {
   beforeEach(() => {
@@ -32,8 +38,9 @@ describe('App', () => {
   });
 
   it('starts on the landing page and navigates to profile creation', async () => {
+    (getCurrentUserId as any).mockResolvedValue('user-1');
     render(<App />);
-    expect(screen.getByRole('heading', { name: "Fetch'd" })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: "Fetch'd" })).toBeInTheDocument();
     expect(window.location.pathname).toBe('/');
 
     await userEvent.click(screen.getByText("I'm a Dog"));
@@ -41,10 +48,11 @@ describe('App', () => {
     expect(window.location.pathname).toBe('/join/dog');
   });
 
-  it('redirects an unauthenticated visit to a protected route back to landing', () => {
+  it('redirects an unauthenticated visit to a protected route back to login', async () => {
+    (getCurrentUserId as any).mockResolvedValue(null);
     window.history.pushState({}, '', '/discover');
     render(<App />);
-    expect(screen.getByRole('heading', { name: "Fetch'd" })).toBeInTheDocument();
-    expect(window.location.pathname).toBe('/');
+    expect(await screen.findByRole('button', { name: 'Log in' })).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/login');
   });
 });

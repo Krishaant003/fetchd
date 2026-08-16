@@ -14,7 +14,7 @@ import type { ActiveProfile } from '../lib/session';
 type FormPhotoSlot = File | string | null;
 
 interface CreateProfileProps {
-  sessionId: string;
+  userId: string;
   profileType: ProfileType;
   existingProfile?: Dog | Adopter;
   onCreated: (profile: ActiveProfile, viewerText: string) => void;
@@ -36,7 +36,7 @@ function emptyPhotos(existingProfile?: Dog | Adopter): [FormPhotoSlot, FormPhoto
   return [...existingProfile.photo_urls];
 }
 
-export function CreateProfile({ sessionId, profileType, existingProfile, onCreated }: CreateProfileProps) {
+export function CreateProfile({ userId, profileType, existingProfile, onCreated }: CreateProfileProps) {
   const isEditing = !!existingProfile;
   const isDog = profileType === 'dog';
   const questions = isDog ? DOG_QUESTIONS : ADOPTER_QUESTIONS;
@@ -107,7 +107,7 @@ export function CreateProfile({ sessionId, profileType, existingProfile, onCreat
       const dog = isEditing
         ? await updateDogProfile({ id: existingProfile!.id, name, breed, age, answers, photos: resolvedPhotos })
         : await createDogProfile({
-            session_id: sessionId,
+            user_id: userId,
             name,
             breed,
             age,
@@ -119,7 +119,7 @@ export function CreateProfile({ sessionId, profileType, existingProfile, onCreat
       const adopter = isEditing
         ? await updateAdopterProfile({ id: existingProfile!.id, name, answers, photos: resolvedPhotos })
         : await createAdopterProfile({
-            session_id: sessionId,
+            user_id: userId,
             name,
             answers,
             photos: resolvedPhotos as [File, File, File, File],

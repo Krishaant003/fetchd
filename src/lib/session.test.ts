@@ -1,15 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getOrCreateSessionId, getActiveProfile, setActiveProfile } from './session';
+import { getActiveProfile, setActiveProfile, clearActiveProfile } from './session';
 
 describe('session', () => {
   beforeEach(() => {
     localStorage.clear();
-  });
-
-  it('creates and persists a session id on first call', () => {
-    const id = getOrCreateSessionId();
-    expect(id).toBeTruthy();
-    expect(getOrCreateSessionId()).toBe(id);
   });
 
   it('returns null when no active profile is stored', () => {
@@ -19,5 +13,11 @@ describe('session', () => {
   it('stores and retrieves the active profile', () => {
     setActiveProfile({ type: 'dog', id: 'abc-123' });
     expect(getActiveProfile()).toEqual({ type: 'dog', id: 'abc-123' });
+  });
+
+  it('removes the active profile', () => {
+    setActiveProfile({ type: 'dog', id: 'abc-123' });
+    clearActiveProfile();
+    expect(getActiveProfile()).toBeNull();
   });
 });

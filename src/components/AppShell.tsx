@@ -6,6 +6,7 @@ interface AppShellProps {
   activeProfile: ActiveProfile | null;
   profileName: string;
   matchCount: number;
+  onLogout: () => void;
 }
 
 const CANVAS_BACKGROUND = {
@@ -25,7 +26,7 @@ function bottomNavLinkClass({ isActive }: { isActive: boolean }): string {
   }`;
 }
 
-export function AppShell({ activeProfile, profileName, matchCount }: AppShellProps) {
+export function AppShell({ activeProfile, profileName, matchCount, onLogout }: AppShellProps) {
   if (!activeProfile) return <Navigate to="/" replace />;
 
   return (
@@ -53,6 +54,10 @@ export function AppShell({ activeProfile, profileName, matchCount }: AppShellPro
           Signed in as
           <br />
           <strong className="text-ink">{profileName}</strong> · {activeProfile.type === 'dog' ? 'Dog' : 'Adopter'}
+          <br />
+          <button onClick={onLogout} className="mt-2 text-clay-700 underline underline-offset-4">
+            Sign out
+          </button>
         </div>
       </aside>
 
@@ -80,6 +85,9 @@ export function AppShell({ activeProfile, profileName, matchCount }: AppShellPro
         <NavLink to="/profile/edit" className={bottomNavLinkClass}>
           Profile
         </NavLink>
+        <button onClick={onLogout} className="flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[11px] text-ink/60 transition-colors">
+          Sign out
+        </button>
       </nav>
     </div>
   );

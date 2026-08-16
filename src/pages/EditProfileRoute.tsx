@@ -5,12 +5,12 @@ import type { Adopter, Dog } from '../types';
 import type { ActiveProfile } from '../lib/session';
 
 interface EditProfileRouteProps {
-  sessionId: string;
+  userId: string;
   activeProfile: ActiveProfile;
   onCreated: (profile: ActiveProfile, viewerText: string) => void;
 }
 
-export function EditProfileRoute({ sessionId, activeProfile, onCreated }: EditProfileRouteProps) {
+export function EditProfileRoute({ userId, activeProfile, onCreated }: EditProfileRouteProps) {
   const [existingProfile, setExistingProfile] = useState<Dog | Adopter | null>(null);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function EditProfileRoute({ sessionId, activeProfile, onCreated }: EditPr
 
   return (
     <CreateProfile
-      sessionId={sessionId}
+      userId={userId}
       profileType={activeProfile.type}
       existingProfile={existingProfile}
       onCreated={onCreated}
