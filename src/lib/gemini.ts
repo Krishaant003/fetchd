@@ -1,6 +1,6 @@
 import type { IntakeExtraction } from '../types';
 
-const GEMINI_MODEL = 'gemini-flash-latest';
+const GEMINI_MODEL = 'gemini-flash-lite-latest';
 
 function endpoint(): string {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
