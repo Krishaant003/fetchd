@@ -71,4 +71,17 @@ shows an AI-generated compatibility note grounded in both sides' answers.
 - `src/lib` — Supabase client, API calls, Gemini integration, session handling
 - `src/types.ts` — shared domain types and profile-note formatting
 - `supabase/` — schema and migrations
-- `docs/superpowers/` — build spec and implementation plans
+- `docs/superpowers/` — documentation hierarchy containing:
+  - `spec.md` — high-level feature specification
+  - `DocumentParser.md` — technical spec for AI document extraction
+  - `plans/` — implementation roadmaps and technical deep-dives
+
+      docs/superpowers/
+      ├── spec.md
+      ├── DocumentParser.md
+      └── plans/
+          ├── auth-flow.md
+          ├── swipe-engine.md
+          └── messaging-system.md
+
+  (See `docs/superpowers/` for the full structure.)
