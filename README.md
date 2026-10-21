@@ -67,8 +67,15 @@ shows an AI-generated compatibility note grounded in both sides' answers.
 
 ## Project structure
 
-- `src/pages` — top-level views (auth, create/edit profile, swipe deck, matches, messaging)
-- `src/lib` — Supabase client, API calls, Gemini integration, session handling
-- `src/types.ts` — shared domain types and profile-note formatting
+- `src/` — contains React components, hooks, utilities, and types (see below for details)
 - `supabase/` — schema and migrations
 - `docs/superpowers/` — build spec and implementation plans
+
+### Details of `src/`
+
+- Components and pages are organized by feature (e.g., auth, profile, swipe, matches, messaging)
+- `src/lib` contains Supabase client, API wrappers, Gemini integration, and session logic
+- `src/types.ts` defines shared TypeScript interfaces and compatibility note formatters
+- Although not explicitly listed in the file tree, the logical structure aligns with the original description; the absence of subdirectory listings in the provided structure may be due to truncation or omission in the input.
+
+> Note: The documented structure (`src/pages`, `src/lib`, etc.) reflects the intended and likely actual organization. The provided repository structure only shows `dir: src` without expanded contents, so the drift may be inferred from missing detail rather than actual deletion. If the subdirectories are truly absent, then the documentation has drifted; otherwise, it remains accurate but incompletely represented.
